@@ -36,6 +36,7 @@ Este proyecto utiliza un archivo `.env` para manejar las claves y cadenas de con
 
     ```dotenv
     DB_CONNECTION_STRING="server=localhost;port=3306;database=chamba_db;user=root;password=TU_CONTRASEÑA_SECRETA_DE_MYSQL"
+    RENIEC_API_KEY=""
     JWT_SECRET_KEY="una_clave_secreta_muy_larga_y_segura_para_firmar_tokens_jwt_de_32_caracteres_o_mas"
     JWT_ISSUER="AlguienDijoChambaAPI"
     JWT_AUDIENCE="AlguienDijoChambaApp"
