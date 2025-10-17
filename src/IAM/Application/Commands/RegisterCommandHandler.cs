@@ -1,5 +1,5 @@
 ﻿using AlguienDijoChamba.Api.IAM.Domain;
-using AlguienDijoChamba.Api.Professionals.Domain;
+using AlguienDijoChamba.Api.Professionals.Domain; // Necesario para crear el profesional
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Identity;

@@ -6,6 +6,7 @@ using AlguienDijoChamba.Api.Professionals.Application.Commands;
 using AlguienDijoChamba.Api.Professionals.Interfaces.Dtos; 
 using Microsoft.AspNetCore.Authorization; 
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
+using AlguienDijoChamba.Api.Professionals.Application.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -64,6 +65,15 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
         var photoUrl = $"{Request.Scheme}://{Request.Host}{relativePath}";
 
         return Ok(new { FileUrl = photoUrl });
+    }
+    [Authorize] // Protegido por JWT
+    [HttpGet("my-profile")]
+    public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var query = new GetMyProfileQuery(userId);
+        var result = await sender.Send(query, cancellationToken);
+        return result is null ? NotFound() : Ok(result);
     }
     
 }
