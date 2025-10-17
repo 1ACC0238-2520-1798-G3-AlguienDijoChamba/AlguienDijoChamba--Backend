@@ -22,7 +22,7 @@ Sigue estos pasos para configurar el proyecto en tu máquina local.
 Abre una terminal y clona el proyecto:
 
 ```shell
-git clone https://URL-DE-TU-REPOSITORIO.git
+git clone https://github.com/1ACC0238-2520-1798-G3-AlguienDijoChamba/AlguienDijoChamba--Backend.git
 cd AlguienDijoChamba
 ```
 
