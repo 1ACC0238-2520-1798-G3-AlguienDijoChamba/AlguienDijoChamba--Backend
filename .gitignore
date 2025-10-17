@@ -1,0 +1,17 @@
+﻿# Dependencies
+/packages
+/bin
+/obj
+/Properties
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Environment files
+.env
+
+# Rider
+.idea/
