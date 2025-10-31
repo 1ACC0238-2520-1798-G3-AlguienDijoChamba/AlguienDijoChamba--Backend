@@ -80,11 +80,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 var app = builder.Build();
 
 // --- CONFIGURACIÓN DEL PIPELINE HTTP ---
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "AlguienDijoChamba API v1"); c.RoutePrefix = string.Empty; });
-}
+// Habilitar Swagger (puedes limitar a Development si prefieres)
+app.UseSwagger();
+app.UseSwaggerUI(c => 
+{ 
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AlguienDijoChamba API v1"); 
+    c.RoutePrefix = string.Empty; 
+});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 // IMPORTANTE: Estos deben ir en este orden
