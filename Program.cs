@@ -1,5 +1,9 @@
 using System.Reflection;
 using System.Text;
+using AlguienDijoChamba.Api.Customers.Application;
+using AlguienDijoChamba.Api.Customers.Domain;
+using AlguienDijoChamba.Api.Customers.Infrastructure.Authentication;
+using AlguienDijoChamba.Api.Customers.Infrastructure.Repositories;
 using AlguienDijoChamba.Api.IAM.Application;
 using AlguienDijoChamba.Api.IAM.Domain;
 using AlguienDijoChamba.Api.IAM.Infrastructure.Authentication;
@@ -48,6 +52,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.Get
 // 5. Añade Repositorios
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProfessionalRepository, ProfessionalRepository>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
 // 6. Añade Servicios Externos (Reniec)
 builder.Services.AddHttpClient("ReniecApiClient", client =>
@@ -61,6 +66,7 @@ builder.Services.AddScoped<IReniecService, ReniecService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.Configure<JwtOptions>(config.GetSection("Jwt"));
 builder.Services.AddSingleton<IJwtProvider, JwtProvider>();
+builder.Services.AddSingleton<ICustomerJwtProvider, CustomerJwtProvider>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -76,9 +82,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:SecretKey"]!))
         };
     });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
+app.UseCors("AllowAll");
 // --- CONFIGURACIÓN DEL PIPELINE HTTP ---
 // Habilitar Swagger (puedes limitar a Development si prefieres)
 app.UseSwagger();
@@ -95,4 +111,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.Run();
+app.Run("http://0.0.0.0:5000"); 
