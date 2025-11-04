@@ -15,6 +15,18 @@ public class Professional
     public int YearsOfExperience { get; private set; }
     public decimal? HourlyRate { get; private set; }
     public string ProfessionalBio { get; private set; }
+    
+    // Parameterless constructor required by EF Core
+    private Professional()
+    {
+        Dni = string.Empty;
+        Nombres = string.Empty;
+        Apellidos = string.Empty;
+        Celular = string.Empty;
+        Email = string.Empty;
+        ProfessionalBio = string.Empty;
+    }
+    
     private Professional(Guid userId, string dni, string nombres, string apellidos, string celular, string email){
         Id = Guid.NewGuid();
         UserId = userId;

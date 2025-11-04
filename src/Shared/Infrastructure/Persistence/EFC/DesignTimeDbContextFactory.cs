@@ -9,10 +9,13 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
     {
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         
-        // Use a dummy connection string for design-time operations
+        // Use connection string from environment variable or default for design-time operations
         // The actual connection string will be provided at runtime
+        var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") 
+            ?? "Server=localhost;Database=alguiendijochamba;User=root;Password=;";
+        
         optionsBuilder.UseMySql(
-            "Server=localhost;Database=alguiendijochamba;User=root;Password=password;",
+            connectionString,
             new MySqlServerVersion(new Version(8, 0, 21))
         );
 
