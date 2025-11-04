@@ -1,4 +1,5 @@
 using System.Reflection;
+using AlguienDijoChamba.Api.Customers.Domain;
 using AlguienDijoChamba.Api.IAM.Domain;
 using AlguienDijoChamba.Api.Professionals.Domain;
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
@@ -12,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<JobRequest> JobRequests { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Professional> Professionals { get; set; }
+    public DbSet<Customer> Customers { get; set; } 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
