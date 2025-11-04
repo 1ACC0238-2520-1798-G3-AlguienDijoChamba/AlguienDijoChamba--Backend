@@ -15,6 +15,7 @@ public class Professional
     public string Email { get; private set; } = string.Empty; // El email de contacto, puede ser diferente al de login
     public DateTime? FechaNacimiento { get; private set; }
     public string? Genero { get; private set; }
+    public string? CertificationUrls { get; private set; }
     
     // Constructor requerido por EF Core
     private Professional() { }
@@ -32,11 +33,21 @@ public class Professional
     }
     public static Professional Create(Guid userId, string dni, string nombres, string apellidos, string celular, string email)
         => new(userId, dni, nombres, apellidos, celular, email);
-    public void UpdateProfile(int yearsOfExperience, decimal? hourlyRate, string professionalBio)
+    public void UpdateProfile(int yearsOfExperience, 
+        decimal? hourlyRate, 
+        string professionalBio, 
+        string? profilePhotoUrl,
+        string? certificationUrlsJson)
     {
         YearsOfExperience = yearsOfExperience;
         HourlyRate = hourlyRate;
         ProfessionalBio = professionalBio;
+        CertificationUrls = certificationUrlsJson;
+        
+        if (!string.IsNullOrEmpty(profilePhotoUrl))
+        {
+            ProfilePhotoUrl = profilePhotoUrl;
+        }
     }
 
     public void UpdateProfilePhoto(string photoUrl)

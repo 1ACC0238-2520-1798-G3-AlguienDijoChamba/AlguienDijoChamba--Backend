@@ -1,4 +1,6 @@
-﻿using AlguienDijoChamba.Api.Professionals.Domain;
+﻿// En: AlguienDijoChamba.Api.Professionals.Application.Commands/CompleteProfileCommandHandler.cs
+using System.Text.Json; // <-- Importa el serializador JSON
+using AlguienDijoChamba.Api.Professionals.Domain;
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 using MediatR;
 
@@ -15,7 +17,23 @@ public class CompleteProfileCommandHandler(IProfessionalRepository professionalR
             throw new Exception("Perfil de profesional no encontrado.");
         }
 
-        professional.UpdateProfile(request.YearsOfExperience, request.HourlyRate, request.ProfessionalBio);
+        // --- LÓGICA ACTUALIZADA ---
+        
+        // 1. Serializa la lista de URLs de certificaciones a un string JSON
+        string? certUrlsJson = null;
+        if (request.CertificationUrls != null && request.CertificationUrls.Count > 0)
+        {
+            certUrlsJson = JsonSerializer.Serialize(request.CertificationUrls);
+        }
+
+        // 2. Llama al método de dominio actualizado
+        professional.UpdateProfile(
+            request.YearsOfExperience, 
+            request.HourlyRate, 
+            request.ProfessionalBio,
+            request.ProfilePhotoUrl, // Pasa la URL de la foto
+            certUrlsJson             // Pasa el JSON de las certificaciones
+        );
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return true;

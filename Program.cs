@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.FileProviders;
 
 DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -79,6 +80,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+// --- 1. AÑADE ESTE BLOQUE PARA CREAR LA CARPETA 'UPLOADS' ---
+var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+    Console.WriteLine($"[INFO] Directorio de subidas creado: {uploadsPath}");
+}
 // --- CONFIGURACIÓN DEL PIPELINE HTTP ---
 // Habilitar Swagger (puedes limitar a Development si prefieres)
 app.UseSwagger();
@@ -90,6 +98,16 @@ app.UseSwaggerUI(c =>
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    // Usa ContentRootPath para encontrar la carpeta 'uploads'
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(app.Environment.ContentRootPath, "uploads")),
+    // Mapea la URL /uploads para que apunte a esa carpeta
+    RequestPath = "/uploads" 
+});
 // IMPORTANTE: Estos deben ir en este orden
 app.UseAuthentication();
 app.UseAuthorization();
