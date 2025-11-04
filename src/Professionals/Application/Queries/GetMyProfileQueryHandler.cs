@@ -12,18 +12,27 @@ public class GetMyProfileQueryHandler(IProfessionalRepository professionalReposi
         var professional = await professionalRepository.GetByUserIdAsync(request.UserId, cancellationToken);
         if (professional is null) return null;
 
-        // Simulación de datos que aún no están en la entidad principal
+        // Simulación de datos que aún no están en la entidad
         var professionalLevel = "Gold Professional";
         var starRating = 4.9;
         var completedJobs = 127;
         var availableBalance = 1250.0m;
-        
+
         return new ProfileResponse(
-            $"{professional.Nombres} {professional.Apellidos}",
+            $"{professional.Nombres} {professional.Apellidos}", // Usamos Nombre Completo para userName
             professionalLevel,
             starRating,
             completedJobs,
-            availableBalance
+            availableBalance,
+            // --- AÑADIMOS ESTOS DATOS PARA EL MÓVIL ---
+            professional.Nombres,
+            professional.Apellidos,
+            professional.Ocupacion,
+            professional.Email,
+            professional.Celular,
+            professional.FechaNacimiento,
+            professional.Genero,
+            professional.ProfilePhotoUrl
         );
     }
 }

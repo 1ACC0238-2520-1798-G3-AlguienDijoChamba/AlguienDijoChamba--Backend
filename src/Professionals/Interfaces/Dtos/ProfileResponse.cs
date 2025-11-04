@@ -5,5 +5,14 @@ public record ProfileResponse(
     string ProfessionalLevel,
     double StarRating,
     int CompletedJobs,
-    decimal AvailableBalance
+    decimal AvailableBalance,
+    // --- NUEVOS CAMPOS ---
+    string Nombres,
+    string Apellidos,
+    string Ocupacion,
+    string Email,
+    string Celular,
+    DateTime? FechaNacimiento,
+    string? Genero,
+    string? FotoPerfilUrl
 );

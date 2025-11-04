@@ -1,13 +1,13 @@
-﻿// En: AlguienDijoChamba.Api.Professionals.Application.Commands/CompleteProfileCommand.cs
-using MediatR;
+﻿using MediatR;
+using System.Collections.Generic; // Asegúrate de que esta importación exista
 
 namespace AlguienDijoChamba.Api.Professionals.Application.Commands;
 
-// --- ARCHIVO ACTUALIZADO ---
 public record CompleteProfileCommand(
     Guid UserId,
     int YearsOfExperience,
     decimal? HourlyRate,
     string ProfessionalBio,
-    string? ProfilePhotoUrl,
-    List<string>? CertificationUrls) : IRequest<bool>;
+    string? ProfilePhotoUrl,          // <-- ¡AÑADE ESTO!
+    List<string>? CertificationUrls   // <-- ¡AÑADE ESTO!
+) : IRequest<bool>;

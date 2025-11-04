@@ -1,21 +1,23 @@
 ﻿using System.Security.Claims;
 using AlguienDijoChamba.Api.Professionals.Application.Queries;
 using AlguienDijoChamba.Api.Professionals.Domain;
-using AlguienDijoChamba.Api.Shared.Interfaces.Dtos;
+using AlguienDijoChamba.Api.Shared.Interfaces.Dtos; 
 using AlguienDijoChamba.Api.Professionals.Application.Commands;
-using AlguienDijoChamba.Api.Professionals.Interfaces.Dtos;
-using Microsoft.AspNetCore.Authorization;
+using AlguienDijoChamba.Api.Professionals.Interfaces.Dtos; 
+using Microsoft.AspNetCore.Authorization; 
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-// Nota: He limpiado las importaciones duplicadas que tenías
 namespace AlguienDijoChamba.Api.Professionals.Interfaces;
 
 [ApiController]
-[Route("api/v1/[controller]")] // Esto crea la ruta /api/v1/professionals
+[Route("api/v1/[controller]")] // Define la ruta base /api/v1/professionals
 public class ProfessionalsController(ISender sender, IWebHostEnvironment webHostEnvironment) : ControllerBase
 {
+    /// <summary>
+    /// Obtiene información de RENIEC a partir de un número de DNI.
+    /// </summary>
     [HttpGet("reniec/{dni}")]
     [ProducesResponseType(typeof(ReniecInfo), 200)]
     [ProducesResponseType(typeof(ErrorResponse), 404)]
@@ -32,23 +34,20 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
         return Ok(result);
     }
     
-    [Authorize]
+    [Authorize] // Protegido por JWT
     [HttpPost("complete-profile")]
-    // --- ESTE ES EL MÉTODO CORREGIDO ---
     public async Task<IActionResult> CompleteProfile([FromBody] CompleteProfileRequest request, CancellationToken cancellationToken)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        // --- CORRECCIÓN AQUÍ ---
-        // Ahora pasamos los 6 argumentos que el comando espera,
-        // tomándolos del 'request' (DTO).
+        // Pasamos los 6 argumentos que el comando espera, incluyendo las URLs de subida.
         var command = new CompleteProfileCommand(
             userId, 
             request.YearsOfExperience, 
             request.HourlyRate, 
             request.ProfessionalBio,
-            request.ProfilePhotoUrl,     // <-- Argumento 5 (nuevo)
-            request.CertificationUrls    // <-- Argumento 6 (nuevo)
+            request.ProfilePhotoUrl,     // Argumento 5: URL de la foto
+            request.CertificationUrls    // Argumento 6: URLs de certificaciones
         );
         
         var result = await sender.Send(command, cancellationToken);
@@ -67,23 +66,14 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
         var command = new UploadProfilePhotoCommand(userId, file);
         var relativePath = await sender.Send(command, cancellationToken);
 
+        // Construimos la URL completa aquí
         var photoUrl = $"{Request.Scheme}://{Request.Host}{relativePath}";
 
         return Ok(new { FileUrl = photoUrl });
     }
     
     [Authorize] // Protegido por JWT
-    [HttpGet("my-profile")]
-    public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
-    {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var query = new GetMyProfileQuery(userId);
-        var result = await sender.Send(query, cancellationToken);
-        return result is null ? NotFound() : Ok(result);
-    }
-    
-    [Authorize]
-    [HttpPost("upload-certification")] // <-- NUEVO ENDPOINT
+    [HttpPost("upload-certification")] // Endpoint para subida de certificación
     public async Task<IActionResult> UploadCertification(IFormFile file, CancellationToken cancellationToken)
     {
         if (file == null || file.Length == 0)
@@ -94,7 +84,19 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
         var command = new UploadCertificationCommand(userId, file);
         var relativePath = await sender.Send(command, cancellationToken);
         
+        // Construimos la URL completa
         var fileUrl = $"{Request.Scheme}://{Request.Host}{relativePath}";
         return Ok(new { FileUrl = fileUrl });
+    }
+    
+    [Authorize] // Protegido por JWT
+    [HttpGet("my-profile")]
+    public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var query = new GetMyProfileQuery(userId);
+        var result = await sender.Send(query, cancellationToken);
+        // Devuelve 404 si el perfil no se encontró, lo cual el frontend debe manejar.
+        return result is null ? NotFound() : Ok(result);
     }
 }
