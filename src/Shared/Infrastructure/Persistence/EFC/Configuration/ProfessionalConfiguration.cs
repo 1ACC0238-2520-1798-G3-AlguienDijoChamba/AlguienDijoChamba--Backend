@@ -1,4 +1,4 @@
-﻿using AlguienDijoChamba.Api.Professionals.Domain;
+﻿﻿using AlguienDijoChamba.Api.Professionals.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,10 +14,19 @@ public class ProfessionalConfiguration : IEntityTypeConfiguration<Professional>
         builder.Property(p => p.Nombres).IsRequired().HasMaxLength(100);
         builder.Property(p => p.Apellidos).IsRequired().HasMaxLength(100);
         builder.Property(p => p.Celular).IsRequired().HasMaxLength(9);
+        builder.Property(p => p.Email).IsRequired().HasMaxLength(255);
         builder.Property(p => p.ProfilePhotoUrl).IsRequired(false); // Opcional
         builder.Property(p => p.YearsOfExperience).IsRequired();
         builder.Property(p => p.HourlyRate).IsRequired(false); // Opcional
         builder.Property(p => p.ProfessionalBio).IsRequired().HasMaxLength(1200);
+        builder.Property(p => p.Ocupacion).IsRequired().HasMaxLength(100);
+        builder.Property(p => p.FechaNacimiento).IsRequired(false); // Opcional
+        builder.Property(p => p.Genero).IsRequired(false).HasMaxLength(50); // Opcional
+        builder.Property(p => p.ProfessionalBio).IsRequired().HasMaxLength(1200);
+        builder.Property(p => p.Ocupacion).IsRequired().HasMaxLength(100);
+        builder.Property(p => p.CertificationUrls)
+            .IsRequired(false) // Es opcional
+            .HasMaxLength(4096);
 
         // Relación uno a uno con User
         builder.HasOne<IAM.Domain.User>()

@@ -3,4 +3,6 @@
 public record CompleteProfileRequest(
     int YearsOfExperience,
     decimal? HourlyRate,
-    string ProfessionalBio);
+    string ProfessionalBio,
+    string? ProfilePhotoUrl,
+    List<string>? CertificationUrls);

@@ -1,4 +1,5 @@
-﻿using AlguienDijoChamba.Api.Professionals.Domain;
+﻿using System.Text.Json; 
+using AlguienDijoChamba.Api.Professionals.Domain;
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 using MediatR;
 
@@ -15,7 +16,20 @@ public class CompleteProfileCommandHandler(IProfessionalRepository professionalR
             throw new Exception("Perfil de profesional no encontrado.");
         }
 
-        professional.UpdateProfile(request.YearsOfExperience, request.HourlyRate, request.ProfessionalBio);
+        string? certUrlsJson = null;
+        if (request.CertificationUrls != null && request.CertificationUrls.Count > 0)
+        {
+            certUrlsJson = JsonSerializer.Serialize(request.CertificationUrls);
+        }
+
+        // 2. CORRECCIÓN: Llama a UpdateProfile con los 5 argumentos
+        professional.UpdateProfile(
+            request.YearsOfExperience, 
+            request.HourlyRate, 
+            request.ProfessionalBio,
+            request.ProfilePhotoUrl,     
+            certUrlsJson                 
+        );
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return true;
