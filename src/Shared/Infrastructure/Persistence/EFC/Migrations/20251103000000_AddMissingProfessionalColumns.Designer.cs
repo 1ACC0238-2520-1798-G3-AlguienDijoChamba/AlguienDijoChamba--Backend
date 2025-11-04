@@ -4,6 +4,7 @@ using AlguienDijoChamba.Api.Shared.Infrastructure.Persistence.EFC;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251103000000_AddMissingProfessionalColumns")]
+    partial class AddMissingProfessionalColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,10 +92,6 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
                         .HasMaxLength(9)
                         .HasColumnType("varchar(9)");
 
-                    b.Property<string>("CertificationUrls")
-                        .HasMaxLength(4096)
-                        .HasColumnType("varchar(4096)");
-
                     b.Property<string>("Dni")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
@@ -159,3 +158,4 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
         }
     }
 }
+

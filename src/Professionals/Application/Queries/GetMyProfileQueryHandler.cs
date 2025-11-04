@@ -19,11 +19,20 @@ public class GetMyProfileQueryHandler(IProfessionalRepository professionalReposi
         var availableBalance = 1250.0m;
 
         return new ProfileResponse(
-            $"{professional.Nombres} {professional.Apellidos}",
+            $"{professional.Nombres} {professional.Apellidos}", // Usamos Nombre Completo para userName
             professionalLevel,
             starRating,
             completedJobs,
-            availableBalance
+            availableBalance,
+            // --- AÑADIMOS ESTOS DATOS PARA EL MÓVIL ---
+            professional.Nombres,
+            professional.Apellidos,
+            professional.Ocupacion,
+            professional.Email,
+            professional.Celular,
+            professional.FechaNacimiento,
+            professional.Genero,
+            professional.ProfilePhotoUrl
         );
     }
 }

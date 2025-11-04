@@ -1,7 +1,10 @@
-﻿using AlguienDijoChamba.Api.Professionals.Domain;
+﻿// En: AlguienDijoChamba.Api.Professionals.Application.Commands/UploadProfilePhotoCommandHandler.cs
+
+using AlguienDijoChamba.Api.Professionals.Domain;
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
+using System.IO; // Importación necesaria
 
 namespace AlguienDijoChamba.Api.Professionals.Application.Commands;
 
@@ -19,9 +22,11 @@ public class UploadProfilePhotoCommandHandler(
             throw new Exception("Perfil de profesional no encontrado.");
         }
 
-        var uploadsFolder = Path.Combine(webHostEnvironment.WebRootPath, "uploads", "profile-photos");
+        // --- CORRECCIÓN AQUÍ: Usamos ContentRootPath ---
+        var uploadsFolder = Path.Combine(webHostEnvironment.ContentRootPath, "uploads", "profile-photos");
+        
         if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
+        
         var uniqueFileName = $"{Guid.NewGuid()}_{request.File.FileName}";
         var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
@@ -30,8 +35,7 @@ public class UploadProfilePhotoCommandHandler(
             await request.File.CopyToAsync(stream, cancellationToken);
         }
 
-        // Para la URL, necesitamos el contexto de la petición, que no tenemos aquí.
-        // La mejor práctica es devolver una ruta relativa y construir la URL completa en el controlador.
+        // Ruta relativa que la aplicación cliente usará para cargar la imagen
         var relativePath = $"/uploads/profile-photos/{uniqueFileName}";
 
         professional.UpdateProfilePhoto(relativePath);

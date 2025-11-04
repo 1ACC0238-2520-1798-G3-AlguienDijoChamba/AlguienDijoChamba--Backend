@@ -1,4 +1,4 @@
-﻿# AlguienDijoChamba - Backend API
+﻿﻿# AlguienDijoChamba - Backend API
 
 Este repositorio contiene el código fuente para el backend de la aplicación **AlguienDijoChamba**. La API está construida con **.NET 9** siguiendo los principios de **Domain-Driven Design (DDD)** y **CQRS**, y utiliza **MySQL** como base de datos.
 
@@ -79,6 +79,40 @@ La API se iniciará y estará disponible en `http://localhost:5101` (el puerto p
 
 ## \#\# Migraciones de la Base de Datos 🗄️
 
+### Aplicar Migraciones Existentes
+
+**IMPORTANTE:** Antes de ejecutar la aplicación por primera vez, debes aplicar las migraciones para crear las tablas en la base de datos.
+
+**Método 1 - Script Automático (Recomendado):**
+```shell
+# Windows CMD
+ejecutar-migracion.bat
+
+# PowerShell
+.\aplicar-migracion.ps1
+```
+
+**Método 2 - Comandos Manuales:**
+```shell
+# 1. Compila el proyecto
+dotnet build
+
+# 2. Aplica todas las migraciones pendientes
+dotnet ef database update
+```
+
+**Método 3 - SQL Directo:**
+Si prefieres, puedes ejecutar manualmente el script `add_missing_columns.sql` en tu cliente MySQL.
+
+### Verificar Migraciones Aplicadas
+
+Para ver qué migraciones ya están aplicadas:
+```shell
+dotnet ef migrations list
+```
+
+### Crear Nuevas Migraciones
+
 Si realizas cambios en las entidades del dominio (en las carpetas `Domain`), necesitarás crear una nueva migración para actualizar la base de datos.
 
 1.  Abre una terminal en la carpeta del proyecto `AlguienDijoChamba.Api`.
@@ -94,3 +128,12 @@ Si realizas cambios en las entidades del dominio (en las carpetas `Domain`), nec
     ```shell
     dotnet ef database update
     ```
+
+### Scripts Disponibles
+
+El proyecto incluye varios scripts de ayuda:
+
+- **`ejecutar-migracion.bat`** - Script CMD que compila y aplica migraciones
+- **`aplicar-migracion.ps1`** - Script PowerShell con validación completa
+- **`add_missing_columns.sql`** - Script SQL para aplicación manual
+- **`SOLUCION_MIGRACION.md`** - Documentación detallada de la migración actual
