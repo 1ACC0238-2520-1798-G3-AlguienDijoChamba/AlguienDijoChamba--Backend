@@ -3,4 +3,5 @@
 public record CompleteProfileRequest(
     int YearsOfExperience,
     decimal? HourlyRate,
-    string ProfessionalBio);
+    string ProfessionalBio
+);

@@ -7,6 +7,8 @@ using AlguienDijoChamba.Api.Professionals.Interfaces.Dtos;
 using Microsoft.AspNetCore.Authorization; 
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 using AlguienDijoChamba.Api.Professionals.Application.Queries;
+using AlguienDijoChamba.Api.Professionals.Application.Commands;
+using AlguienDijoChamba.Api.Professionals.Interfaces.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,11 +39,11 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
 
         return Ok(result);
     }
-    [Authorize] // Protege el endpoint, solo usuarios con token pueden acceder
+    [Authorize]
     [HttpPost("complete-profile")]
+    // Esta línea ya no dará error
     public async Task<IActionResult> CompleteProfile([FromBody] CompleteProfileRequest request, CancellationToken cancellationToken)
     {
-        // Obtenemos el ID del usuario desde el token JWT
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         var command = new CompleteProfileCommand(userId, request.YearsOfExperience, request.HourlyRate, request.ProfessionalBio);

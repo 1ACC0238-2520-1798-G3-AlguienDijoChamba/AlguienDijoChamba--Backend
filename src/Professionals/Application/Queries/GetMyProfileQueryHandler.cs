@@ -12,12 +12,12 @@ public class GetMyProfileQueryHandler(IProfessionalRepository professionalReposi
         var professional = await professionalRepository.GetByUserIdAsync(request.UserId, cancellationToken);
         if (professional is null) return null;
 
-        // Simulación de datos que aún no están en la entidad
+        // Simulación de datos que aún no están en la entidad principal
         var professionalLevel = "Gold Professional";
         var starRating = 4.9;
         var completedJobs = 127;
         var availableBalance = 1250.0m;
-
+        
         return new ProfileResponse(
             $"{professional.Nombres} {professional.Apellidos}",
             professionalLevel,
