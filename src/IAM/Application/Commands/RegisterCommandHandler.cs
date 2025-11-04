@@ -29,7 +29,7 @@ public class RegisterCommandHandler(
         userRepository.Add(user);
 
         // 4. Crear la entidad Professional asociada
-        var professional = Professional.Create(user.Id, request.Dni, request.Nombres, request.Apellidos, request.Celular);
+        var professional = Professional.Create(user.Id, request.Dni, request.Nombres, request.Apellidos, request.Celular, request.Email);
         professionalRepository.Add(professional);
 
         // 5. Guardar todos los cambios en la base de datos

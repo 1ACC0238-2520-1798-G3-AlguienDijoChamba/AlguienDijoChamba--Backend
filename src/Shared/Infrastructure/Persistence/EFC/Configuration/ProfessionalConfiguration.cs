@@ -14,6 +14,10 @@ public class ProfessionalConfiguration : IEntityTypeConfiguration<Professional>
         builder.Property(p => p.Nombres).IsRequired().HasMaxLength(100);
         builder.Property(p => p.Apellidos).IsRequired().HasMaxLength(100);
         builder.Property(p => p.Celular).IsRequired().HasMaxLength(9);
+        builder.Property(p => p.Email).IsRequired().HasMaxLength(255);
+        builder.Property(p => p.FechaNacimiento).IsRequired(false); // Opcional
+        builder.Property(p => p.Genero).IsRequired(false).HasMaxLength(50); // Opcional
+        builder.Property(p => p.Ocupacion).IsRequired(false).HasMaxLength(200); // Opcional
         builder.Property(p => p.ProfilePhotoUrl).IsRequired(false); // Opcional
         builder.Property(p => p.YearsOfExperience).IsRequired();
         builder.Property(p => p.HourlyRate).IsRequired(false); // Opcional
