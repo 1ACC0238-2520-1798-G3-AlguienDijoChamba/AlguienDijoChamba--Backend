@@ -15,12 +15,12 @@ public class CustomerJwtProvider(IOptions<JwtOptions> options) : ICustomerJwtPro
     
     public string Generate(User user, string role)
     {
-        // Método nuevo para clientes / otros roles
+        // El Claim de rol se ha eliminado, dejando solo los Claims base (ID y Email).
         var claims = new Claim[]
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email),
-            new(ClaimTypes.Role, role) // <- agrega el rol al token
+            new(JwtRegisteredClaimNames.Email, user.Email)
+            // Se quitó: new(ClaimTypes.Role, role)
         };
 
         var signingCredentials = new SigningCredentials(

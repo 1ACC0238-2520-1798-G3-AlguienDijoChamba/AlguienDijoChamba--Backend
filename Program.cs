@@ -11,6 +11,8 @@ using AlguienDijoChamba.Api.IAM.Infrastructure.Repositories;
 using AlguienDijoChamba.Api.Professionals.Domain;
 using AlguienDijoChamba.Api.Professionals.Infrastructure.ExternalServices.Reniec;
 using AlguienDijoChamba.Api.Professionals.Infrastructure.Repositories;
+using AlguienDijoChamba.Api.Reputation.Domain;
+using AlguienDijoChamba.Api.Reputation.Infrastructure.Repositories;
 using AlguienDijoChamba.Api.Shared.ASP.Configuration.Extensions;
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 using AlguienDijoChamba.Api.Shared.Infrastructure.Persistence.EFC;
@@ -54,6 +56,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.Get
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProfessionalRepository, ProfessionalRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<IReputationRepository, ReputationRepository>();
 
 // 6. Añade Servicios Externos (Reniec)
 builder.Services.AddHttpClient("ReniecApiClient", client =>

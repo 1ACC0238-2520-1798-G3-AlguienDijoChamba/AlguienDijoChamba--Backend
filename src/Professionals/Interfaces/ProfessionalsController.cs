@@ -99,4 +99,5 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
         // Devuelve 404 si el perfil no se encontró, lo cual el frontend debe manejar.
         return result is null ? NotFound() : Ok(result);
     }
+    
 }
