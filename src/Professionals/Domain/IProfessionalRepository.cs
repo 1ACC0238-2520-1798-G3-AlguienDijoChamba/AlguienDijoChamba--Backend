@@ -12,4 +12,6 @@ public interface IProfessionalRepository
     
     // --- MÉTODO REQUERIDO PARA ELIMINACIÓN ---
     void Remove(Professional professional);
+    
+    Task<IEnumerable<Guid>> FindProfessionalIdsByTermAsync(string term, CancellationToken cancellationToken = default);
 }

@@ -15,4 +15,11 @@ public interface IReputationRepository
     Task<Tag?> GetTagByNameAsync(string name, CancellationToken cancellationToken = default);
     void AddTag(Tag tag);
     Task<IEnumerable<Guid>> GetProfessionalsByTagIdAsync(Guid tagId, CancellationToken cancellationToken);
+    
+    Task<IEnumerable<UserReputationTechnician>> SearchReputationsAsync(
+        IEnumerable<Guid>? professionalIds,
+        int page,
+        int limit,
+        CancellationToken cancellationToken = default
+    );
 }

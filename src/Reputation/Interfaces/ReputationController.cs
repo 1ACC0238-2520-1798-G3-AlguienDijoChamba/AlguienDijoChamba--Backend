@@ -9,6 +9,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AssignTagsToProfessionalCommand = AlguienDijoChamba.Api.Reputation.Application.Commands.AssignTagsToProfessionalCommand;
+using AlguienDijoChamba.Api.Reputation.Interfaces.Dtos;
 
 namespace AlguienDijoChamba.Api.Reputation.Interfaces;
 
@@ -17,30 +18,43 @@ namespace AlguienDijoChamba.Api.Reputation.Interfaces;
 [Route("api/v1/reputation")]
 public class ReputationController(ISender sender) : ControllerBase 
 {
-    // --- 1. GET (Query) ---
+    [AllowAnonymous] 
     [HttpGet] 
-    public async Task<IActionResult> GetReputation([FromQuery] Guid? professionalId, CancellationToken cancellationToken)
+// 🚀 CORRECCIÓN: Aceptar AMBOS (el ID simple y el DTO de búsqueda)
+    public async Task<IActionResult> GetReputation(
+        [FromQuery] Guid? professionalId, 
+        [FromQuery] SearchReputationsRequest request, // 👈 ¡ESTO ES LO QUE FALTA!
+        CancellationToken cancellationToken)
     {
-        // 🚀 CORRECCIÓN: Declaramos la variable de respuesta fuera del ámbito if/else.
-        object? response;
+        // 1. CASO DE PRIORIDAD: Búsqueda de UN SOLO profesional (Usando el ID simple)
+        if (professionalId.HasValue && professionalId.Value != Guid.Empty) 
+        {
+            var singleQuery = new GetReputationByProfessionalIdQuery(professionalId.Value);
+            var response = await sender.Send(singleQuery, cancellationToken);
+        
+            if (response is null) return NotFound(); 
+            // Se devuelve envuelto en una lista para evitar el error de formato del frontend.
+            return Ok(new List<object> { response }); 
+        }
 
-        if (professionalId.HasValue && professionalId.Value != Guid.Empty)
-        {
-            // Lógica para UN SOLO profesional
-            var query = new GetReputationByProfessionalIdQuery(professionalId.Value);
-            response = await sender.Send(query, cancellationToken); // Asignamos el valor aquí
-        
-            if (response is null) return NotFound();
+        // 2. CASO GENERAL O COMBINADA (Ahora 'request' ya existe y tiene los campos)
+
+        if (string.IsNullOrWhiteSpace(request.Search) && string.IsNullOrWhiteSpace(request.ProfessionalIds))        {
+            // ... Lógica para devolver TODOS ...
+            var allQuery = new GetAllReputationsQuery(); 
+            var allResponse = await sender.Send(allQuery, cancellationToken); 
+            return Ok(allResponse);
         }
-        else
-        {
-            // Lógica para OBTENER TODOS los profesionales
-            var query = new GetAllReputationsQuery(); 
-            response = await sender.Send(query, cancellationToken); // Asignamos el valor aquí
-        }
-        
-        // La variable 'response' ya está disponible aquí
-        return Ok(response);
+
+        var searchQuery = new SearchReputationsQuery(
+            searchTerm: request.Search,        // <-- Corregido de searchTerm a Search
+            professionalIds: request.ProfessionalIds, // <-- Corregido de professionalIds a ProfessionalIds
+            page: request.Page,                // <-- Corregido de page a Page
+            limit: request.Limit               // <-- Corregido de limit a Limit
+        );
+
+        var responseList = await sender.Send(searchQuery, cancellationToken);
+        return Ok(responseList);
     }
     
     // --- 2. POST (Creación Inicial de Reputación) ---

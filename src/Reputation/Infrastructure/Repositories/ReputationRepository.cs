@@ -94,5 +94,29 @@ public class ReputationRepository(AppDbContext context) : IReputationRepository
 
         return professionalIds;
     }
+    public async Task<IEnumerable<UserReputationTechnician>> SearchReputationsAsync(
+        IEnumerable<Guid>? professionalIds,
+        int page,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        var query = context.Set<UserReputationTechnician>().AsQueryable();
+
+        // 1. FILTRADO POR LISTA FINAL DE IDs
+        if (professionalIds != null && professionalIds.Any())
+        {
+            // Filtra para que solo incluya los IDs que le pasó el Handler
+            query = query.Where(r => professionalIds.Contains(r.ProfessionalId));
+        }
+
+        // 2. PAGINACIÓN y EJECUCIÓN
+        var skip = (page - 1) * limit;
+
+        return await query
+            .Skip(skip)
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+    }
+    
 
 }

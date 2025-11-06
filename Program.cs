@@ -11,6 +11,7 @@ using AlguienDijoChamba.Api.IAM.Infrastructure.Repositories;
 using AlguienDijoChamba.Api.Professionals.Domain;
 using AlguienDijoChamba.Api.Professionals.Infrastructure.ExternalServices.Reniec;
 using AlguienDijoChamba.Api.Professionals.Infrastructure.Repositories;
+using AlguienDijoChamba.Api.Reputation.Application.Queries;
 using AlguienDijoChamba.Api.Reputation.Domain;
 using AlguienDijoChamba.Api.Reputation.Infrastructure.Repositories;
 using AlguienDijoChamba.Api.Shared.ASP.Configuration.Extensions;
@@ -50,7 +51,15 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddPersistence(config);
 
 // 4. Añade MediatR para CQRS
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+builder.Services.AddMediatR(cfg => 
+{
+    // Escanea el ensamblado de la API (por si hay Handlers allí)
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()); 
+    
+    // 🚀 AÑADIR: Escanea el ensamblado de la capa de Application donde reside el Handler
+    // Usamos el 'typeof' de la nueva Query para obtener su ensamblado.
+    cfg.RegisterServicesFromAssembly(typeof(SearchReputationsQuery).Assembly); 
+});
 
 // 5. Añade Repositorios
 builder.Services.AddScoped<IUserRepository, UserRepository>();
