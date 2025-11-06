@@ -100,4 +100,26 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
         return result is null ? NotFound() : Ok(result);
     }
     
+    [AllowAnonymous] 
+    [HttpGet("{professionalId}")] 
+    public async Task<IActionResult> GetProfessionalProfileById(
+        Guid professionalId, 
+        CancellationToken cancellationToken)
+    {
+        // 1. Crear la Query que combina datos
+        var query = new GetProfessionalProfileByIdQuery(professionalId);
+        
+        // 2. Enviar y obtener la respuesta combinada (ProfileResponse)
+        var response = await sender.Send(query, cancellationToken);
+
+        if (response is null) 
+        {
+            // El técnico no existe o no tiene perfil completado
+            return NotFound($"Professional with ID {professionalId} not found or profile incomplete.");
+        }
+        
+        // 3. Devolver la tarjeta completa al frontend (con Nombre, Precio y Reputación)
+        return Ok(response);
+    }
+    
 }

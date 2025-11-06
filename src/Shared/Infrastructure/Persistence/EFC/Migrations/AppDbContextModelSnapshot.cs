@@ -173,6 +173,66 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
                     b.ToTable("Professionals", (string)null);
                 });
 
+            modelBuilder.Entity("AlguienDijoChamba.Api.Reputation.Domain.ProfessionalTag", b =>
+                {
+                    b.Property<Guid>("ProfessionalId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("ProfessionalId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("ProfessionalTags");
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Reputation.Domain.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Reputation.Domain.UserReputationTechnician", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("CompletedJobs")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("HourlyRate")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<Guid>("ProfessionalId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ProfessionalLevel")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<double>("StarRating")
+                        .HasColumnType("double");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Reputations");
+                });
+
             modelBuilder.Entity("AlguienDijoChamba.Api.Professionals.Domain.Professional", b =>
                 {
                     b.HasOne("AlguienDijoChamba.Api.IAM.Domain.User", null)
@@ -180,6 +240,33 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
                         .HasForeignKey("AlguienDijoChamba.Api.Professionals.Domain.Professional", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Reputation.Domain.ProfessionalTag", b =>
+                {
+                    b.HasOne("AlguienDijoChamba.Api.Professionals.Domain.Professional", null)
+                        .WithMany("ProfessionalTags")
+                        .HasForeignKey("ProfessionalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AlguienDijoChamba.Api.Reputation.Domain.Tag", "Tag")
+                        .WithMany("ProfessionalTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Professionals.Domain.Professional", b =>
+                {
+                    b.Navigation("ProfessionalTags");
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Reputation.Domain.Tag", b =>
+                {
+                    b.Navigation("ProfessionalTags");
                 });
 #pragma warning restore 612, 618
         }

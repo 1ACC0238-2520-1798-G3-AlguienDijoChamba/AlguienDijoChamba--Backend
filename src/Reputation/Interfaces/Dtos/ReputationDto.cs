@@ -11,13 +11,10 @@ public class ReputationDto
     // Id del profesional al que pertenece esta reputación
     public Guid ProfessionalId { get; set; } 
 
-    // Puntuación promedio (ej: 4.5)
-    public double Rating { get; set; }
-    // Número total de reseñas
-    public int ReviewsCount { get; set; } 
+    public double StarRating { get; set; }
+    public int CompletedJobs { get; set; } 
 
-    // Nivel del profesional (ej: "Junior", "Mid", "Senior")
-    public string Level { get; set; } 
+    public string ProfessionalLevel { get; set; } 
 
     // Tarifa por hora del profesional (si se gestiona aquí)
     public decimal HourlyRate { get; set; } 

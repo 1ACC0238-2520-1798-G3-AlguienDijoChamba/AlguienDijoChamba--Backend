@@ -1,4 +1,6 @@
-﻿namespace AlguienDijoChamba.Api.Professionals.Domain;
+﻿using AlguienDijoChamba.Api.Reputation.Domain;
+
+namespace AlguienDijoChamba.Api.Professionals.Domain;
 
 public class Professional
 {
@@ -23,6 +25,8 @@ public class Professional
     
     // Campo para guardar las URLs de certificaciones (JSON string)
     public string? CertificationUrls { get; private set; }
+    
+    public ICollection<ProfessionalTag> ProfessionalTags { get; private set; } = new List<ProfessionalTag>();
     
     // Constructor requerido por EF Core (privado y vacío)
     private Professional() { }

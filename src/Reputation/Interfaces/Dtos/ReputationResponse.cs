@@ -3,17 +3,17 @@
 public class ReputationResponse
 {
     public Guid ProfessionalId { get; set; }
-    public double Rating { get; set; }
-    public int ReviewsCount { get; set; }
-    public string Level { get; set; } = string.Empty;
+    public double StarRating { get; set; }
+    public int CompletedJobs { get; set; }
+    public string ProfessionalLevel { get; set; } = string.Empty;
     public decimal HourlyRate { get; set; }
 
-    public ReputationResponse(Guid professionalId, double rating, int reviewsCount, string level, decimal hourlyRate)
+    public ReputationResponse(Guid professionalId, double starRating, int completedJobs, string professionalLevel, decimal hourlyRate)
     {
         ProfessionalId = professionalId;
-        Rating = rating;
-        ReviewsCount = reviewsCount;
-        Level = level;
+        StarRating = starRating;
+        CompletedJobs = completedJobs;
+        ProfessionalLevel = professionalLevel;
         HourlyRate = hourlyRate;
     }
 }

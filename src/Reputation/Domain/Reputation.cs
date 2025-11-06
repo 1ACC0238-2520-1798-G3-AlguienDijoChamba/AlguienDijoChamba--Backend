@@ -4,45 +4,46 @@ public class UserReputationTechnician
 {
     public Guid Id { get; private set; }
     public Guid ProfessionalId { get; private set; }
-    public double Rating { get; private set; }
-    public int ReviewsCount { get; private set; }
-    public string Level { get; private set; } = string.Empty;
+    public double StarRating { get; private set; } 
+    public int CompletedJobs { get; private set; } 
+
+    public string ProfessionalLevel { get; private set; } = string.Empty;
+    
     public decimal HourlyRate { get; private set; }
 
     private UserReputationTechnician() { }
 
-    public UserReputationTechnician(Guid professionalId, double rating, int reviewsCount, string level, decimal hourlyRate)
+    public UserReputationTechnician(Guid professionalId, double starRating, int completedJobs, string professionalLevel, decimal hourlyRate)
     {
         Id = Guid.NewGuid();
         ProfessionalId = professionalId;
-        Rating = rating;
-        ReviewsCount = reviewsCount;
-        Level = level;
+        StarRating = starRating; 
+        CompletedJobs = completedJobs;
+        ProfessionalLevel = professionalLevel;
         HourlyRate = hourlyRate;
     }
 
-    public void UpdateRating(double rating, int reviewsCount)
+    // Métodos de actualización deben usar los nuevos nombres
+    public void UpdateRating(double starRating, int completedJobs)
     {
-        Rating = rating;
-        ReviewsCount = reviewsCount;
+        StarRating = starRating;
+        CompletedJobs = completedJobs;
     }
     
-    public void UpdateDetails(double rating, int reviewsCount, string level, decimal hourlyRate)
+    public void UpdateDetails(double starRating, int completedJobs, string professionalLevel, decimal hourlyRate)
     {
-        // Puedes reutilizar tu método UpdateRating
-        UpdateRating(rating, reviewsCount);
+        UpdateRating(starRating, completedJobs);
         
-        // Actualiza el resto de las propiedades
-        Level = level;
+        // ⬅️ Propiedades actualizadas
+        ProfessionalLevel = professionalLevel;
         HourlyRate = hourlyRate;
     }
     
-    public void UpdateAll(double rating, int reviewsCount, string level, decimal hourlyRate)
+    public void UpdateAll(double starRating, int completedJobs, string professionalLevel, decimal hourlyRate)
     {
-        // Reutilizamos el método existente y actualizamos las propiedades restantes.
-        UpdateRating(rating, reviewsCount); 
+        UpdateRating(starRating, completedJobs); 
         
-        Level = level;
+        ProfessionalLevel = professionalLevel;
         HourlyRate = hourlyRate;
     }
 }

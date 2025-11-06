@@ -58,6 +58,7 @@ builder.Services.AddScoped<IProfessionalRepository, ProfessionalRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IReputationRepository, ReputationRepository>();
 
+
 // 6. Añade Servicios Externos (Reniec)
 builder.Services.AddHttpClient("ReniecApiClient", client =>
 {

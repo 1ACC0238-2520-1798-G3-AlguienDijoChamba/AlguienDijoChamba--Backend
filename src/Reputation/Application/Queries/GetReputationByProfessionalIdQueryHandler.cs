@@ -20,9 +20,9 @@ namespace AlguienDijoChamba.Api.Reputation.Application.Queries
 
             return new ReputationResponse(
                 rep.ProfessionalId,
-                rep.Rating,
-                rep.ReviewsCount,
-                rep.Level,
+                rep.StarRating,        
+                rep.CompletedJobs,   
+                rep.ProfessionalLevel,  
                 rep.HourlyRate
             );
         }
