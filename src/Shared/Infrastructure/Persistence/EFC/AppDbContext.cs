@@ -48,11 +48,44 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasForeignKey(pt => pt.ProfessionalId)
                 .OnDelete(DeleteBehavior.Cascade); // Opcional
         });
-
+        
         // 🔒 Unicidad del nombre del Tag
         modelBuilder.Entity<Tag>(entity =>
         {
             entity.HasIndex(t => t.Name).IsUnique();
+        });
+        
+        // ✨ NUEVA CONFIGURACIÓN para JobRequest (Active Jobs)
+        modelBuilder.Entity<JobRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Campos obligatorios
+            entity.Property(e => e.ClientId).IsRequired();
+            entity.Property(e => e.Specialty).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Status).IsRequired().HasConversion<string>();
+            
+            // ✨ NUEVOS campos para Active Jobs
+            entity.Property(e => e.Address).HasMaxLength(200);
+            entity.Property(e => e.ScheduledHour).HasMaxLength(50);
+            entity.Property(e => e.AdditionalMessage).HasMaxLength(500);
+            entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+            entity.Property(e => e.TotalCost).HasPrecision(10, 2);
+            
+            // ✨ Almacenar Categories como JSON (EF Core 7+)
+            entity.Property(e => e.Categories)
+                .HasConversion(
+                    v => string.Join(',', v),
+                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+                );
+            
+            // ✨ Índice para búsquedas rápidas de active jobs
+            entity.HasIndex(e => new { e.ClientId, e.Status });
+            
+            // Relaciones (si existen navigation properties en el futuro)
+            // entity.HasOne<Customer>()...
+            // entity.HasOne<Professional>()...
         });
     }
     

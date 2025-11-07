@@ -23,6 +23,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.FileProviders;
+// ✨ NUEVO: Imports para Jobs
+using AlguienDijoChamba.Api.Jobs.Domain;
+using AlguienDijoChamba.Api.Jobs.Infrastructure.Repositories;
 
 DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -66,7 +69,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProfessionalRepository, ProfessionalRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IReputationRepository, ReputationRepository>();
-
+// ✨ NUEVO: Añade JobRequestRepository
+builder.Services.AddScoped<IJobRequestRepository, JobRequestRepository>();
 
 // 6. Añade Servicios Externos (Reniec)
 builder.Services.AddHttpClient("ReniecApiClient", client =>
@@ -81,7 +85,6 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.Configure<JwtOptions>(config.GetSection("Jwt"));
 builder.Services.AddSingleton<IJwtProvider, JwtProvider>();
 builder.Services.AddSingleton<ICustomerJwtProvider, CustomerJwtProvider>();
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -107,7 +110,6 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
-
 
 var app = builder.Build();
 
@@ -143,6 +145,7 @@ app.UseStaticFiles(new StaticFileOptions
     // Mapea la URL /uploads para que apunte a esa carpeta
     RequestPath = "/uploads" 
 });
+
 // IMPORTANTE: Estos deben ir en este orden
 app.UseAuthentication();
 app.UseAuthorization();
