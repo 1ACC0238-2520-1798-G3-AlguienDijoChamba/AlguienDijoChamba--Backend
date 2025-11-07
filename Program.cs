@@ -23,9 +23,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.FileProviders;
-// ✨ NUEVO: Imports para Jobs
-using AlguienDijoChamba.Api.Jobs.Domain;
-using AlguienDijoChamba.Api.Jobs.Infrastructure.Repositories;
+using AlguienDijoChamba.Api.Reputation.Application;
+using AlguienDijoChamba.Api.Jobs.Domain;  // Para IJobRequestRepository
+using AlguienDijoChamba.Api.Jobs.Infrastructure.Repositories;  // Para JobRequestRepository
+
+
 
 DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -62,6 +64,9 @@ builder.Services.AddMediatR(cfg =>
     // 🚀 AÑADIR: Escanea el ensamblado de la capa de Application donde reside el Handler
     // Usamos el 'typeof' de la nueva Query para obtener su ensamblado.
     cfg.RegisterServicesFromAssembly(typeof(SearchReputationsQuery).Assembly); 
+    
+    // 🔵 AGREGA TU PROPIO ASSEMBLY PARA TU HANDLER NUEVO:
+    cfg.RegisterServicesFromAssembly(typeof(AlguienDijoChamba.Api.Reputation.Application.CreateReputationFromJobCommandHandler).Assembly);
 });
 
 // 5. Añade Repositorios
@@ -69,8 +74,10 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProfessionalRepository, ProfessionalRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IReputationRepository, ReputationRepository>();
-// ✨ NUEVO: Añade JobRequestRepository
+builder.Services.AddScoped<ReputationRepository>();
 builder.Services.AddScoped<IJobRequestRepository, JobRequestRepository>();
+
+
 
 // 6. Añade Servicios Externos (Reniec)
 builder.Services.AddHttpClient("ReniecApiClient", client =>
@@ -85,6 +92,7 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.Configure<JwtOptions>(config.GetSection("Jwt"));
 builder.Services.AddSingleton<IJwtProvider, JwtProvider>();
 builder.Services.AddSingleton<ICustomerJwtProvider, CustomerJwtProvider>();
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -110,6 +118,7 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
+
 
 var app = builder.Build();
 
@@ -145,7 +154,6 @@ app.UseStaticFiles(new StaticFileOptions
     // Mapea la URL /uploads para que apunte a esa carpeta
     RequestPath = "/uploads" 
 });
-
 // IMPORTANTE: Estos deben ir en este orden
 app.UseAuthentication();
 app.UseAuthorization();
