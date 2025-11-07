@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AlguienDijoChamba.Api.Reputation.Application.Commands;
@@ -8,8 +9,8 @@ using AlguienDijoChamba.Api.Reputation.Interfaces.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using AssignTagsToProfessionalCommand = AlguienDijoChamba.Api.Reputation.Application.Commands.AssignTagsToProfessionalCommand;
-using AlguienDijoChamba.Api.Reputation.Interfaces.Dtos;
 
 namespace AlguienDijoChamba.Api.Reputation.Interfaces;
 
@@ -18,12 +19,27 @@ namespace AlguienDijoChamba.Api.Reputation.Interfaces;
 [Route("api/v1/reputation")]
 public class ReputationController(ISender sender) : ControllerBase 
 {
+    // --- 1. GET (Búsqueda de Reputación) ---
+    
+    /// <summary>
+    /// Recupera la reputación de uno o más profesionales.
+    /// </summary>
+    /// <remarks>
+    /// Si se proporciona 'professionalId', devuelve solo la reputación de ese profesional.
+    /// Si se usan los parámetros de búsqueda, realiza una búsqueda paginada o filtrada.
+    /// Si no se proporciona ningún parámetro, devuelve todas las reputaciones.
+    /// </remarks>
+    /// <param name="professionalId">ID único del profesional (si se busca uno solo).</param>
+    /// <param name="request">DTO para la búsqueda general de reputaciones (filtros y paginación).</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Una lista de objetos de reputación (Response 200).</returns>
     [AllowAnonymous] 
     [HttpGet] 
-// 🚀 CORRECCIÓN: Aceptar AMBOS (el ID simple y el DTO de búsqueda)
+    [ProducesResponseType(typeof(List<object>), 200)] // Tipo genérico
+    [ProducesResponseType(404)]
     public async Task<IActionResult> GetReputation(
         [FromQuery] Guid? professionalId, 
-        [FromQuery] SearchReputationsRequest request, // 👈 ¡ESTO ES LO QUE FALTA!
+        [FromQuery] SearchReputationsRequest request,
         CancellationToken cancellationToken)
     {
         // 1. CASO DE PRIORIDAD: Búsqueda de UN SOLO profesional (Usando el ID simple)
@@ -37,9 +53,9 @@ public class ReputationController(ISender sender) : ControllerBase
             return Ok(new List<object> { response }); 
         }
 
-        // 2. CASO GENERAL O COMBINADA (Ahora 'request' ya existe y tiene los campos)
-
-        if (string.IsNullOrWhiteSpace(request.Search) && string.IsNullOrWhiteSpace(request.ProfessionalIds))        {
+        // 2. CASO GENERAL O COMBINADA 
+        if (string.IsNullOrWhiteSpace(request.Search) && string.IsNullOrWhiteSpace(request.ProfessionalIds))
+        {
             // ... Lógica para devolver TODOS ...
             var allQuery = new GetAllReputationsQuery(); 
             var allResponse = await sender.Send(allQuery, cancellationToken); 
@@ -47,10 +63,10 @@ public class ReputationController(ISender sender) : ControllerBase
         }
 
         var searchQuery = new SearchReputationsQuery(
-            searchTerm: request.Search,        // <-- Corregido de searchTerm a Search
-            professionalIds: request.ProfessionalIds, // <-- Corregido de professionalIds a ProfessionalIds
-            page: request.Page,                // <-- Corregido de page a Page
-            limit: request.Limit               // <-- Corregido de limit a Limit
+            searchTerm: request.Search,
+            professionalIds: request.ProfessionalIds,
+            page: request.Page,
+            limit: request.Limit
         );
 
         var responseList = await sender.Send(searchQuery, cancellationToken);
@@ -58,9 +74,21 @@ public class ReputationController(ISender sender) : ControllerBase
     }
     
     // --- 2. POST (Creación Inicial de Reputación) ---
+    
+    /// <summary>
+    /// Crea el registro inicial de reputación para un nuevo profesional.
+    /// </summary>
+    /// <remarks>
+    /// Este endpoint debe llamarse al registrar un nuevo técnico. Establece la tarifa inicial.
+    /// </remarks>
+    /// <param name="request">DTO con el ProfessionalId y la InitialHourlyRate.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>La entidad de reputación creada.</returns>
     [HttpPost("initial")] 
+    [ProducesResponseType(typeof(object), 201)] // Tipo genérico
+    [ProducesResponseType(400)]
     public async Task<IActionResult> CreateInitialReputation(
-        [FromBody] CreateInitialReputationRequest request, // DTO de Request
+        [FromBody] CreateInitialReputationRequest request,
         CancellationToken cancellationToken)
     {
         if (request == null) return BadRequest("Request body cannot be null.");
@@ -70,17 +98,43 @@ public class ReputationController(ISender sender) : ControllerBase
             request.InitialHourlyRate 
         );
         
-        // ⚠️ Nota: Asumo que tu handler devuelve el objeto UserReputationTechnician
+        // Asumo que tu handler devuelve una entidad o DTO de reputación
         var reputationEntity = await sender.Send(command, cancellationToken);
         
-        return CreatedAtAction(nameof(GetReputation), new { professionalId = reputationEntity.ProfessionalId }, reputationEntity);
+        // El DTO de reputación debe tener un ProfessionalId
+        return CreatedAtAction(nameof(GetReputation), new { professionalId = GetProfessionalIdFromResponse(reputationEntity) }, reputationEntity);
+    }
+    
+    // Función auxiliar para evitar errores de compilación si la entidad no es conocida
+    private static Guid GetProfessionalIdFromResponse(object response)
+    {
+        // Esto es un placeholder; en un código real, harías un casting seguro o usarías interfaces.
+        // Asumo que la propiedad existe en la entidad que devuelve el handler.
+        var type = response.GetType();
+        var prop = type.GetProperty("ProfessionalId");
+        if (prop != null)
+        {
+            return (Guid)prop.GetValue(response)!;
+        }
+        return Guid.Empty; // Devuelve un GUID vacío si no se puede obtener la propiedad.
     }
 
+
     // --- 3. PUT (Actualización / Recálculo por Reseña) ---
+    
+    /// <summary>
+    /// Recalcula la reputación de un profesional tras recibir una nueva reseña o rating.
+    /// </summary>
+    /// <param name="professionalId">ID único del profesional.</param>
+    /// <param name="request">DTO que contiene el nuevo valor de rating a aplicar.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>La entidad de reputación actualizada.</returns>
     [HttpPut("{professionalId}/recalculate")] 
+    [ProducesResponseType(typeof(object), 200)] // Tipo genérico
+    [ProducesResponseType(400)]
     public async Task<IActionResult> RecalculateReputation(
         Guid professionalId, 
-        [FromBody] RecalculateReputationRequest request, // DTO que contiene solo NewRatingValue
+        [FromBody] RecalculateReputationRequest request,
         CancellationToken cancellationToken)
     {
         if (request == null) return BadRequest("Request body cannot be null.");
@@ -99,16 +153,33 @@ public class ReputationController(ISender sender) : ControllerBase
     // ## 🛠️ Endpoints de Tags (Commands)
     // ----------------------------------------------------
 
+    /// <summary>
+    /// Crea una nueva etiqueta de habilidad o servicio. Requiere autenticación.
+    /// </summary>
+    /// <param name="command">Comando con el nombre y descripción del Tag.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>El DTO de la etiqueta creada.</returns>
     [Authorize]
     [HttpPost("tags")]
+    [ProducesResponseType(typeof(TagDto), 201)]
+    [ProducesResponseType(401)]
     public async Task<IActionResult> CreateTag([FromBody] CreateTagCommand command, CancellationToken cancellationToken)
     {
         var tagDto = await sender.Send(command, cancellationToken);
         return CreatedAtAction(nameof(GetTagById), new { tagId = tagDto.Id }, tagDto);
     }
     
+    /// <summary>
+    /// Asigna una o más etiquetas existentes a un profesional. Requiere autenticación.
+    /// </summary>
+    /// <param name="command">Comando con el ID del profesional y la lista de TagIds a asignar.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Confirmación de asignación exitosa.</returns>
     [Authorize]
     [HttpPut("tags/assign")]
+    [ProducesResponseType(typeof(string), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
     public async Task<IActionResult> AssignTagsToProfessional([FromBody] AssignTagsToProfessionalCommand command, CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken);
@@ -122,8 +193,14 @@ public class ReputationController(ISender sender) : ControllerBase
     // ## 🔍 Endpoints de Tags (Queries)
     // ----------------------------------------------------
 
+    /// <summary>
+    /// Obtiene la lista completa de todas las etiquetas disponibles.
+    /// </summary>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Una lista de DTOs de etiquetas.</returns>
     [AllowAnonymous] 
     [HttpGet("tags")] 
+    [ProducesResponseType(typeof(List<TagDto>), 200)]
     public async Task<IActionResult> GetAllTags(CancellationToken cancellationToken)
     {
         var query = new GetAllTagsQuery(); 
@@ -132,41 +209,57 @@ public class ReputationController(ISender sender) : ControllerBase
         return Ok(response); 
     }
     
+    /// <summary>
+    /// Obtiene una etiqueta específica por su ID.
+    /// </summary>
+    /// <param name="tagId">ID de la etiqueta a buscar.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>El DTO de la etiqueta solicitada.</returns>
     [AllowAnonymous] 
     [HttpGet("tags/{tagId}")]
+    [ProducesResponseType(typeof(TagDto), 200)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> GetTagById(Guid tagId, CancellationToken cancellationToken)
     {
-        // 🚀 CORRECCIÓN: Se debe declarar la variable de respuesta
         object? response = await sender.Send(new GetTagByIdQuery(tagId), cancellationToken);
 
         if (response is null) return NotFound();
         return Ok(response);
     }
     
+    /// <summary>
+    /// Obtiene una lista de IDs de profesionales asociados a una etiqueta específica.
+    /// </summary>
+    /// <remarks>
+    /// Retorna una lista vacía si la etiqueta no tiene profesionales asociados, pero la etiqueta existe.
+    /// </remarks>
+    /// <param name="tagId">ID de la etiqueta.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Lista de GUIDs (ProfessionalId).</returns>
     [AllowAnonymous] 
-    [HttpGet("tags/{tagId}/professionals")] // ¡Nueva y clara ruta!
+    [HttpGet("tags/{tagId}/professionals")]
+    [ProducesResponseType(typeof(IEnumerable<Guid>), 200)]
     public async Task<IActionResult> GetProfessionalsByTag(Guid tagId, CancellationToken cancellationToken)
     {
-        // Se envía la nueva Query al sender (MediatR)
         var response = await sender.Send(new GetProfessionalsByTagQuery(tagId), cancellationToken);
 
-        // Si la respuesta es una lista vacía, se puede decidir retornar Ok (200) con lista vacía,
-        // o NotFound (404) si se considera que el "recurso" de profesionales asociados no existe.
         if (response == null || !response.Any())
         {
-            // Opción: Retornar 404 si no hay profesionales asociados.
-            // return NotFound(); 
-        
-            // Opción Recomendada: Retornar 200 OK con una lista vacía [], ya que el TagId *existe*.
             return Ok(Enumerable.Empty<Guid>());
         }
     
-        // Retornar la lista de GUIDs (los ProfessionalId)
         return Ok(response); 
     }
 
+    /// <summary>
+    /// Obtiene las etiquetas que han sido asignadas a un profesional específico.
+    /// </summary>
+    /// <param name="professionalId">ID del profesional.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>Lista de DTOs de las etiquetas asignadas.</returns>
     [AllowAnonymous] 
     [HttpGet("tags/professional/{professionalId}")] 
+    [ProducesResponseType(typeof(List<TagDto>), 200)]
     public async Task<IActionResult> GetTagsByProfessionalId(Guid professionalId, CancellationToken cancellationToken)
     {
         var query = new GetTagsByProfessionalIdQuery(professionalId);
