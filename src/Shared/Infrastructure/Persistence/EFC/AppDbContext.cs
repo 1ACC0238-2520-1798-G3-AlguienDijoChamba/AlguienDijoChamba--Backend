@@ -5,6 +5,7 @@ using AlguienDijoChamba.Api.Professionals.Domain;
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 using AlguienDijoChamba.Api.Reputation.Domain;
 using AlguienDijoChamba.Api.Jobs.Domain;
+using AlguienDijoChamba.Api.Notifications.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace AlguienDijoChamba.Api.Shared.Infrastructure.Persistence.EFC;
@@ -18,6 +19,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<UserReputationTechnician> Reputations { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<ProfessionalTag> ProfessionalTags { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

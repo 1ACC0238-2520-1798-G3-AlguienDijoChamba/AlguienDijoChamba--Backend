@@ -32,7 +32,11 @@ public class CustomerController(ISender sender) : ControllerBase
     public async Task<IActionResult> Login([FromBody] CustomerLoginRequest request, CancellationToken cancellationToken)
     {
         var query = new CustomerLoginQuery(request.Email, request.Password);
-        var token = await sender.Send(query, cancellationToken);
-        return Ok(new { Token = token });
+        
+        // 🛑 CAMBIO CLAVE: El resultado es el DTO completo: { Token, CustomerId }
+        var result = await sender.Send(query, cancellationToken);
+        
+        // 🛑 Devolvemos el DTO completo. El 404 de Flutter desaparecerá.
+        return Ok(result); 
     }
 }
