@@ -9,7 +9,9 @@ using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace AlguienDijoChamba.Api.Professionals.Interfaces;
+
 
 [ApiController]
 [Route("api/v1/[controller]")] // Define la ruta base /api/v1/professionals
@@ -26,10 +28,12 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
         var query = new GetReniecInfoQuery(dni);
         var result = await sender.Send(query, cancellationToken);
 
+
         if (result is null)
         {
             return NotFound(new ErrorResponse("DNI no encontrado."));
         }
+
 
         return Ok(result);
     }
@@ -39,6 +43,7 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
     public async Task<IActionResult> CompleteProfile([FromBody] CompleteProfileRequest request, CancellationToken cancellationToken)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
 
         // Pasamos los 6 argumentos que el comando espera, incluyendo las URLs de subida.
         var command = new CompleteProfileCommand(
@@ -61,13 +66,17 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
         if (file == null || file.Length == 0)
             return BadRequest(new ErrorResponse("No se ha seleccionado ningún archivo."));
 
+
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
 
         var command = new UploadProfilePhotoCommand(userId, file);
         var relativePath = await sender.Send(command, cancellationToken);
 
+
         // Construimos la URL completa aquí
         var photoUrl = $"{Request.Scheme}://{Request.Host}{relativePath}";
+
 
         return Ok(new { FileUrl = photoUrl });
     }
@@ -79,7 +88,9 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
         if (file == null || file.Length == 0)
             return BadRequest(new ErrorResponse("No se ha seleccionado ningún archivo."));
 
+
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
 
         var command = new UploadCertificationCommand(userId, file);
         var relativePath = await sender.Send(command, cancellationToken);
@@ -112,14 +123,34 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
         // 2. Enviar y obtener la respuesta combinada (ProfileResponse)
         var response = await sender.Send(query, cancellationToken);
 
+
         if (response is null) 
         {
             // El técnico no existe o no tiene perfil completado
             return NotFound($"Professional with ID {professionalId} not found or profile incomplete.");
         }
         
-        // 3. Devolver la tarjeta completa al frontend (con Nombre, Precio y Reputación)
-        return Ok(response);
+        // ✨ MODIFICACIÓN: Agregar el ID a la respuesta
+        // 3. Devolver la tarjeta completa al frontend (con Nombre, Precio, Reputación e ID)
+        var result = new 
+        {
+            id = professionalId.ToString(),
+            userName = response.UserName,
+            professionalLevel = response.ProfessionalLevel,
+            starRating = response.StarRating,
+            completedJobs = response.CompletedJobs,
+            availableBalance = response.AvailableBalance,
+            nombres = response.Nombres,
+            apellidos = response.Apellidos,
+            ocupacion = response.Ocupacion,
+            email = response.Email,
+            celular = response.Celular,
+            fechaNacimiento = response.FechaNacimiento,
+            genero = response.Genero,
+            fotoPerfilUrl = response.FotoPerfilUrl
+        };
+        
+        return Ok(result);
     }
     
 }

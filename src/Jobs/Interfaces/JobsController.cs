@@ -1,35 +1,316 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AlguienDijoChamba.Api.Jobs.Domain;
+using AlguienDijoChamba.Api.Jobs.Interfaces.Dtos;
+using AlguienDijoChamba.Api.Shared.Domain.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace AlguienDijoChamba.Api.Jobs.Interfaces;
+
 
 [ApiController]
 [Route("api/v1/[controller]")]
 public class JobsController : ControllerBase
 {
+    // ✨ NUEVO: Inyección de dependencias para Active Jobs
+    private readonly IJobRequestRepository _jobRequestRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+
+    public JobsController(IJobRequestRepository jobRequestRepository, IUnitOfWork unitOfWork)
+    {
+        _jobRequestRepository = jobRequestRepository;
+        _unitOfWork = unitOfWork;
+    }
+
+
+    // ===========================================
+    // 🔵 ENDPOINTS ORIGINALES DE TUS COLEGAS
+    // ===========================================
+
+
     // Endpoint para que un cliente cree una solicitud
     [Authorize]
     [HttpPost("request")]
-    public async Task<IActionResult> CreateJobRequest(/* [FromBody] CreateJobRequestDto request */)
+    public async Task<IActionResult> CreateJobRequest([FromBody] CreateActiveJobRequest request)
     {
-        // Aquí iría la lógica con MediatR para crear la solicitud
-        // 1. Obtener el ID del cliente desde el token.
-        // 2. Crear un CreateJobRequestCommand.
-        // 3. Enviar el comando con MediatR.
-        // 4. El handler crearía la entidad JobRequest y la guardaría.
+        try
+        {
+            // Aquí iría la lógica con MediatR para crear la solicitud
+            // 1. Obtener el ID del cliente desde el token.
+            // 2. Crear un CreateJobRequestCommand.
+            // 3. Enviar el comando con MediatR.
+            // 4. El handler crearía la entidad JobRequest y la guardaría.
 
-        return Ok(new { message = "Endpoint de creación de solicitud listo para implementar." });
+            var jobRequest = JobRequest.CreateActiveJob(
+                clientId: request.CustomerId,
+                professionalId: request.ProfessionalId,
+                specialty: request.Specialty,
+                description: request.Description,
+                address: request.Address,
+                scheduledDate: request.ScheduledDate,
+                scheduledHour: request.ScheduledHour,
+                additionalMessage: request.AdditionalMessage,
+                categories: request.Categories,
+                paymentMethod: request.PaymentMethod,
+                totalCost: (decimal)request.TotalCost
+            );
+
+            _jobRequestRepository.Add(jobRequest);
+            await _unitOfWork.SaveChangesAsync();
+
+            // ✨ RETORNA EL JOB COMPLETO CON ID
+            return CreatedAtAction(nameof(GetJobById), new { jobId = jobRequest.Id }, new JobDto
+            {
+                Id = jobRequest.Id,
+                ClientId = jobRequest.ClientId,
+                ProfessionalId = jobRequest.ProfessionalId ?? Guid.Empty,
+                Specialty = jobRequest.Specialty,
+                Description = jobRequest.Description,
+                Address = jobRequest.Address,
+                ScheduledDate = jobRequest.ScheduledDate,
+                ScheduledHour = jobRequest.ScheduledHour,
+                AdditionalMessage = jobRequest.AdditionalMessage,
+                Categories = jobRequest.Categories,
+                PaymentMethod = jobRequest.PaymentMethod,
+                TotalCost = jobRequest.TotalCost,
+                Status = jobRequest.Status.ToString(),
+                CreatedAt = jobRequest.CreatedAt,
+                UpdatedAt = jobRequest.UpdatedAt
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error creating job request", error = ex.Message });
+        }
     }
+
 
     // Endpoint para que un profesional vea las solicitudes disponibles
     [Authorize]
     [HttpGet("available")]
     public async Task<IActionResult> GetAvailableRequests()
     {
-        // Aquí iría la lógica con MediatR para obtener las solicitudes
-        // 1. Crear un GetAvailableJobsQuery.
-        // 2. El handler consultaría la base de datos por solicitudes con estado "Pending".
+        try
+        {
+            // Aquí iría la lógica con MediatR para obtener las solicitudes
+            // 1. Crear un GetAvailableJobsQuery.
+            // 2. El handler consultaría la base de datos por solicitudes con estado "Pending".
 
-        return Ok(new { message = "Endpoint de solicitudes disponibles listo para implementar." });
+            return Ok(new { message = "Endpoint de solicitudes disponibles listo para implementar." });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error fetching available jobs", error = ex.Message });
+        }
+    }
+
+    // ===========================================
+    // ✨ NUEVOS ENDPOINTS PARA ACTIVE JOBS
+    // ===========================================
+
+    /// <summary>
+    /// POST /api/v1/jobs/active
+    /// ✨ NUEVO: Crear un nuevo Active Job (cuando el cliente paga)
+    /// </summary>
+    [Authorize]
+    [HttpPost("active")]
+    public async Task<IActionResult> CreateActiveJob([FromBody] CreateActiveJobRequest request)
+    {
+        try
+        {
+            // Validaciones
+            if (string.IsNullOrEmpty(request.Address))
+                return BadRequest(new { message = "Address is required" });
+
+            if (request.ScheduledDate < DateTime.UtcNow.AddHours(1))
+                return BadRequest(new { message = "Scheduled date must be at least 1 hour in the future" });
+
+            if (request.TotalCost <= 0)
+                return BadRequest(new { message = "Total cost must be greater than 0" });
+
+            // Crear el job
+            var jobRequest = JobRequest.CreateActiveJob(
+                clientId: request.CustomerId,
+                professionalId: request.ProfessionalId,
+                specialty: request.Specialty,
+                description: request.Description,
+                address: request.Address,
+                scheduledDate: request.ScheduledDate,
+                scheduledHour: request.ScheduledHour,
+                additionalMessage: request.AdditionalMessage,
+                categories: request.Categories,
+                paymentMethod: request.PaymentMethod,
+                totalCost: (decimal)request.TotalCost
+            );
+
+            _jobRequestRepository.Add(jobRequest);
+            await _unitOfWork.SaveChangesAsync();
+
+            // ✨ RETORNA EL JOB COMPLETO CON ID
+            return CreatedAtAction(nameof(GetActiveJobByClient), new { clientId = request.CustomerId }, new JobDto
+            {
+                Id = jobRequest.Id,
+                ClientId = jobRequest.ClientId,
+                ProfessionalId = jobRequest.ProfessionalId ?? Guid.Empty,
+                Specialty = jobRequest.Specialty,
+                Description = jobRequest.Description,
+                Address = jobRequest.Address,
+                ScheduledDate = jobRequest.ScheduledDate,
+                ScheduledHour = jobRequest.ScheduledHour,
+                AdditionalMessage = jobRequest.AdditionalMessage,
+                Categories = jobRequest.Categories,
+                PaymentMethod = jobRequest.PaymentMethod,
+                TotalCost = jobRequest.TotalCost,
+                Status = jobRequest.Status.ToString(),
+                CreatedAt = jobRequest.CreatedAt,
+                UpdatedAt = jobRequest.UpdatedAt
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error creating active job", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// GET /api/v1/jobs/active/customer/{clientId}
+    /// ✨ NUEVO: Obtener el Active Job actual del cliente
+    /// </summary>
+    [Authorize]
+    [HttpGet("active/customer/{clientId}")]
+    public async Task<IActionResult> GetActiveJobByClient(Guid clientId)
+    {
+        try
+        {
+            var jobRequest = await _jobRequestRepository.GetActiveJobByClientAsync(clientId);
+
+            if (jobRequest == null)
+                return NotFound(new { message = "No active job found for this client" });
+
+            // ✨ FIX: Manejar ProfessionalId nullable
+            var response = new JobDto
+            {
+                Id = jobRequest.Id,
+                ClientId = jobRequest.ClientId,
+                ProfessionalId = jobRequest.ProfessionalId ?? Guid.Empty,
+                Specialty = jobRequest.Specialty,
+                Description = jobRequest.Description,
+                Address = jobRequest.Address,
+                ScheduledDate = jobRequest.ScheduledDate,
+                ScheduledHour = jobRequest.ScheduledHour,
+                AdditionalMessage = jobRequest.AdditionalMessage,
+                Categories = jobRequest.Categories,
+                PaymentMethod = jobRequest.PaymentMethod,
+                TotalCost = jobRequest.TotalCost,
+                Status = jobRequest.Status.ToString(),
+                CreatedAt = jobRequest.CreatedAt,
+                UpdatedAt = jobRequest.UpdatedAt
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error fetching active job", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// PATCH /api/v1/jobs/{jobId}/status
+    /// ✨ NUEVO: Actualizar el estado del job (Completed, Declined, etc)
+    /// </summary>
+    [Authorize]
+[HttpPatch("{jobId}/status")]
+public async Task<IActionResult> UpdateJobStatus(Guid jobId, [FromBody] UpdateJobStatusRequest request)
+{
+    try
+    {
+        Console.WriteLine($"🔵 PATCH /status recibida - JobId: {jobId}, Status: {request.Status}");
+        
+        var jobRequest = await _jobRequestRepository.GetByIdAsync(jobId);
+        
+        if (jobRequest == null)
+        {
+            Console.WriteLine($"❌ Job no encontrado: {jobId}");
+            return NotFound(new { message = "Job not found" });
+        }
+
+        Console.WriteLine($"✅ Job encontrado. Status actual: {jobRequest.Status}");
+
+        if (!Enum.TryParse<JobRequestStatus>(request.Status, out var newStatus))
+        {
+            Console.WriteLine($"❌ Status inválido: {request.Status}");
+            return BadRequest(new { message = "Invalid status" });
+        }
+
+        if (jobRequest.Status == newStatus)
+        {
+            Console.WriteLine($"❌ Job ya está en estado: {newStatus}");
+            return BadRequest(new { message = $"Job is already {newStatus}" });
+        }
+
+        Console.WriteLine($"🔄 Actualizando status de {jobRequest.Status} a {newStatus}");
+        jobRequest.UpdateStatus(newStatus);
+        await _jobRequestRepository.UpdateAsync(jobRequest);
+
+        Console.WriteLine($"✅ Job actualizado exitosamente");
+        return Ok(new
+        {
+            message = "Job status updated successfully",
+            job = new
+            {
+                jobRequest.Id,
+                Status = jobRequest.Status.ToString(),
+                jobRequest.UpdatedAt
+            }
+        });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ EXCEPCIÓN: {ex.Message}");
+        Console.WriteLine($"❌ STACK: {ex.StackTrace}");
+        return StatusCode(500, new { message = "Error updating job status", error = ex.Message });
+    }
+}
+
+    /// <summary>
+    /// GET /api/v1/jobs/{jobId}
+    /// ✨ NUEVO: Obtener detalles de un job específico
+    /// </summary>
+    [Authorize]
+    [HttpGet("{jobId}")]
+    public async Task<IActionResult> GetJobById(Guid jobId)
+    {
+        try
+        {
+            var jobRequest = await _jobRequestRepository.GetByIdAsync(jobId);
+
+            if (jobRequest == null)
+                return NotFound(new { message = "Job not found" });
+
+            return Ok(new JobDto
+            {
+                Id = jobRequest.Id,
+                ClientId = jobRequest.ClientId,
+                ProfessionalId = jobRequest.ProfessionalId ?? Guid.Empty,
+                Specialty = jobRequest.Specialty,
+                Description = jobRequest.Description,
+                Address = jobRequest.Address,
+                ScheduledDate = jobRequest.ScheduledDate,
+                ScheduledHour = jobRequest.ScheduledHour,
+                AdditionalMessage = jobRequest.AdditionalMessage,
+                Categories = jobRequest.Categories,
+                PaymentMethod = jobRequest.PaymentMethod,
+                TotalCost = jobRequest.TotalCost,
+                Status = jobRequest.Status.ToString(),
+                CreatedAt = jobRequest.CreatedAt,
+                UpdatedAt = jobRequest.UpdatedAt
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error fetching job", error = ex.Message });
+        }
     }
 }
