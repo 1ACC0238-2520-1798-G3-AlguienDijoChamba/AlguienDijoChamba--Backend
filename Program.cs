@@ -8,6 +8,8 @@ using AlguienDijoChamba.Api.IAM.Application;
 using AlguienDijoChamba.Api.IAM.Domain;
 using AlguienDijoChamba.Api.IAM.Infrastructure.Authentication;
 using AlguienDijoChamba.Api.IAM.Infrastructure.Repositories;
+using AlguienDijoChamba.Api.Notifications.Domain;
+using AlguienDijoChamba.Api.Notifications.Infrastructure.Repositories;
 using AlguienDijoChamba.Api.Professionals.Domain;
 using AlguienDijoChamba.Api.Professionals.Infrastructure.ExternalServices.Reniec;
 using AlguienDijoChamba.Api.Professionals.Infrastructure.Repositories;
@@ -74,10 +76,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProfessionalRepository, ProfessionalRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IReputationRepository, ReputationRepository>();
-builder.Services.AddScoped<ReputationRepository>();
-builder.Services.AddScoped<IJobRequestRepository, JobRequestRepository>();
-
-
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 // 6. Añade Servicios Externos (Reniec)
 builder.Services.AddHttpClient("ReniecApiClient", client =>
