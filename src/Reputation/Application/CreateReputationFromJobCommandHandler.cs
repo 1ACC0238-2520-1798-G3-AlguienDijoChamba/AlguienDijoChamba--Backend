@@ -1,17 +1,16 @@
 using AlguienDijoChamba.Api.Jobs.Domain;
 using AlguienDijoChamba.Api.Reputation.Application.Commands;
-using AlguienDijoChamba.Api.Reputation.Domain;
+using AlguienDijoChamba.Api.Reputation.Domain; // <-- Importa la Interfaz
 using AlguienDijoChamba.Api.Reputation.Interfaces.Dtos;
-using AlguienDijoChamba.Api.Reputation.Infrastructure.Repositories;
+// Elimina la importación de la clase concreta de Repositories
 using MediatR;
 
 namespace AlguienDijoChamba.Api.Reputation.Application;
 
 public class CreateReputationFromJobCommandHandler : IRequestHandler<CreateReputationFromJobCommand, object>
 {
-    private readonly ReputationRepository _reputationRepository;
-
-    public CreateReputationFromJobCommandHandler(ReputationRepository reputationRepository)
+    private readonly IReputationRepository _reputationRepository;
+    public CreateReputationFromJobCommandHandler(IReputationRepository reputationRepository) 
     {
         _reputationRepository = reputationRepository;
     }
