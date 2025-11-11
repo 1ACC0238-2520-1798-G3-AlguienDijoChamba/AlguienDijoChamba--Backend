@@ -5,7 +5,6 @@ using AlguienDijoChamba.Api.Shared.Interfaces.Dtos;
 using AlguienDijoChamba.Api.Professionals.Application.Commands;
 using AlguienDijoChamba.Api.Professionals.Interfaces.Dtos; 
 using Microsoft.AspNetCore.Authorization; 
-using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -108,7 +107,29 @@ public class ProfessionalsController(ISender sender, IWebHostEnvironment webHost
         var query = new GetMyProfileQuery(userId);
         var result = await sender.Send(query, cancellationToken);
         // Devuelve 404 si el perfil no se encontró, lo cual el frontend debe manejar.
-        return result is null ? NotFound() : Ok(result);
+        return result is null ? NotFound() : Ok(result);    
+    }
+    
+    [Authorize]
+    [HttpPut("my-profile")] // <-- Usa el método PUT y la misma ruta
+    public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateProfileRequest request, CancellationToken cancellationToken)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        // Creamos el comando de actualización (debe coincidir con la definición del comando)
+        var command = new UpdateProfileCommand(
+            userId,
+            request.Email,
+            request.Celular,
+            request.Ocupacion,
+            request.FechaNacimiento,
+            request.Genero
+        );
+
+        var result = await sender.Send(command, cancellationToken);
+        
+        // Si el resultado es true (actualización exitosa), devolvemos 204 No Content
+        return result ? NoContent() : NotFound();
     }
     
     [AllowAnonymous] 
