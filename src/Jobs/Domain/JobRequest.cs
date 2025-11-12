@@ -62,10 +62,17 @@ public class JobRequest
         };
     }
     
-    // ✨ NUEVO MÉTODO para actualizar estado
     public void UpdateStatus(JobRequestStatus newStatus)
     {
         Status = newStatus;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    // --- 🚀 AÑADE ESTE NUEVO MÉTODO ---
+    public void UpdateCost(decimal newCost)
+    {
+        // Actualiza el costo total del trabajo
+        TotalCost = newCost;
         UpdatedAt = DateTime.UtcNow;
     }
 }

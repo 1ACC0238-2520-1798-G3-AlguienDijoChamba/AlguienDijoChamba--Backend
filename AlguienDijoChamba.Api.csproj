@@ -29,7 +29,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="src\Jobs\Application\" />
       <Folder Include="src\Jobs\Infrastructure\" />
       <Folder Include="src\Shared\Infrastructure\Persistence\Repositories\" />
     </ItemGroup>

@@ -26,8 +26,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.FileProviders;
 using AlguienDijoChamba.Api.Reputation.Application;
-using AlguienDijoChamba.Api.Jobs.Domain;  // Para IJobRequestRepository
-using AlguienDijoChamba.Api.Jobs.Infrastructure.Repositories;  // Para JobRequestRepository
+using AlguienDijoChamba.Api.Jobs.Domain;  
+using AlguienDijoChamba.Api.Jobs.Infrastructure.Repositories;
+using AlguienDijoChamba.Api.Hubs; 
+using Microsoft.AspNetCore.SignalR; 
 
 
 
@@ -119,6 +121,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddSignalR();
+
 
 var app = builder.Build();
 
@@ -159,4 +163,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Esta es la ruta que usarán los clientes Flutter y Android
+// Asegúrate de que apunte al namespace correcto de tu Hub
+app.MapHub<AlguienDijoChamba.Api.Hubs.ServiceRequestHub>("/hubs/servicerequests");
 app.Run(); 
