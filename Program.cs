@@ -109,6 +109,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = config["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:SecretKey"]!))
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                // Los clientes SignalR envían el token en el query string "access_token"
+                var accessToken = context.Request.Query["access_token"];
+
+                // Si hay token y la ruta es la del Hub...
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    (path.StartsWithSegments("/hubs/servicerequests")))
+                {
+                    // Leemos el token del Query String y lo asignamos al contexto
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
+        
     });
 
 builder.Services.AddCors(options =>
