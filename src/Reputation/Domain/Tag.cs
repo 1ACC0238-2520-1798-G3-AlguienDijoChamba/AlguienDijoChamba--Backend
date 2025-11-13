@@ -6,7 +6,7 @@ public class Tag
     public Guid Id { get; private set; }
     public string Name { get; private set; } = string.Empty;
 
-    // Propiedad de navegación para la relación N:M
+    // Propiedad de navegación para la relaciónn N:M
     public ICollection<ProfessionalTag> ProfessionalTags { get; set; } = new List<ProfessionalTag>();
 
     private Tag() { }
