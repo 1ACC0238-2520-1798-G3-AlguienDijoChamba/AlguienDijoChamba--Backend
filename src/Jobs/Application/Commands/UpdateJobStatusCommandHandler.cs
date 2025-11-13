@@ -19,10 +19,14 @@ public class UpdateJobStatusCommandHandler(
     public async Task Handle(UpdateJobStatusCommand request, CancellationToken cancellationToken)
     {
         var jobRequest = await jobRequestRepository.GetByIdAsync(request.JobId);
+    
         if (jobRequest == null)
+        {
+            Console.WriteLine($"❌ ERROR: Job {request.JobId} no encontrado en BD.");
             throw new Exception("Job no encontrado");
+        }
 
-        // 1. Actualizar el estado en la BD
+        // 1. Actualizar el estado
         jobRequest.UpdateStatus(request.NewStatus);
         if(request.NewStatus == JobRequestStatus.Accepted && request.ProposedCost.HasValue)
         {
@@ -31,34 +35,36 @@ public class UpdateJobStatusCommandHandler(
     
         await jobRequestRepository.UpdateAsync(jobRequest);
 
-        // 2. Notificar EXCLUSIVAMENTE al Cliente (Flutter)
-        // Convertimos el ClientId (Guid) a string para SignalR
-        string customerUserId = jobRequest.ClientId.ToString(); 
+        // 2. Notificar
+        string customerUserId = jobRequest.ClientId.ToString();
     
+        // 🛑 LOGS DE DEPURACIÓN
+        Console.WriteLine($"🔔 SIGNALR: Intentando notificar cambio de estado.");
+        Console.WriteLine($"   - JobId: {request.JobId}");
+        Console.WriteLine($"   - Nuevo Estado: {request.NewStatus}");
+        Console.WriteLine($"   - Cliente ID (Destinatario): {customerUserId}");
+
         if (request.NewStatus == JobRequestStatus.Accepted)
         {
-            // CORRECCIÓN: Usar Clients.User para enviar solo al cliente dueño del Job
             await hubContext.Clients.User(customerUserId).SendAsync(
-                "RequestAccepted", // Este nombre debe coincidir con el listener en Flutter (.on('RequestAccepted'...))
-                new { // Enviamos un objeto anónimo o un DTO simple
-                    request.JobId, 
-                    request.ProfessionalId, 
-                    request.ProposedCost 
+                "RequestAccepted", 
+                new { 
+                    JobId = request.JobId, 
+                    ProfessionalId = request.ProfessionalId, 
+                    ProposedCost = request.ProposedCost 
                 },
                 cancellationToken
             );
-        
-            // Opcional: Podrías notificar a otros técnicos que el trabajo ya no está disponible
-            // await hubContext.Clients.All.SendAsync("RequestTaken", request.JobId);
+            Console.WriteLine($"✅ Mensaje 'RequestAccepted' enviado al usuario {customerUserId}");
         }
         else if (request.NewStatus == JobRequestStatus.Declined)
         {
-            // Si el técnico rechaza, notificamos al cliente (o simplemente no hacemos nada si otro técnico puede tomarlo)
             await hubContext.Clients.User(customerUserId).SendAsync(
                 "RequestDeclined", 
-                new { request.JobId, request.ProfessionalId },
+                new { JobId = request.JobId },
                 cancellationToken
             );
+            Console.WriteLine($"✅ Mensaje 'RequestDeclined' enviado al usuario {customerUserId}");
         }
     }
 }
