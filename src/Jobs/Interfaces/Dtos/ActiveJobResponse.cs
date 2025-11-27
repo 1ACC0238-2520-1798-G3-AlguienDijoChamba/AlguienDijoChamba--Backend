@@ -11,6 +11,9 @@ public class JobDto
     public Guid Id { get; set; }
     public Guid ClientId { get; set; }
     public Guid ProfessionalId { get; set; }
+
+     // ✨ NUEVO: nombre del técnico
+    public string ProfessionalName { get; set; } = string.Empty;
     public string Specialty { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;

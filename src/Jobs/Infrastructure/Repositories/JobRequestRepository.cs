@@ -32,6 +32,16 @@ public class JobRequestRepository : IJobRequestRepository
             .FirstOrDefaultAsync();
     }
 
+    // ✨ NUEVO: listar todos los jobs de un cliente (incluyendo Professional)
+    public async Task<IReadOnlyList<JobRequest>> GetByClientAsync(Guid clientId)
+    {
+        return await _context.JobRequests
+            .Include(j => j.Professional) // 👈 incluye datos del técnico
+            .Where(j => j.ClientId == clientId)
+            .OrderByDescending(j => j.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task UpdateAsync(JobRequest jobRequest)
     {
         _context.JobRequests.Update(jobRequest);
