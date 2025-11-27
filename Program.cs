@@ -31,6 +31,7 @@ using AlguienDijoChamba.Api.Jobs.Infrastructure.Repositories;  // Para JobReques
 
 
 
+
 DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,6 +78,8 @@ builder.Services.AddScoped<IProfessionalRepository, ProfessionalRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IReputationRepository, ReputationRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IJobRequestRepository, JobRequestRepository>();
+
 
 // 6. Añade Servicios Externos (Reniec)
 builder.Services.AddHttpClient("ReniecApiClient", client =>
