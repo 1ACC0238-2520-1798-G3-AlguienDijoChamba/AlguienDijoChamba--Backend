@@ -5,6 +5,7 @@ using AlguienDijoChamba.Api.Jobs.Interfaces.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 
 namespace AlguienDijoChamba.Api.Jobs.Interfaces;
 
@@ -12,15 +13,14 @@ namespace AlguienDijoChamba.Api.Jobs.Interfaces;
 [Route("api/v1/[controller]")]
 public class JobsController : ControllerBase
 {
-    // --- Inyectar MediatR (ISender) y el Repositorio (para los GETs) ---
-    private readonly ISender _sender;
+    // --- Inyectar el Repositorio (para los GETs) ---
     private readonly IJobRequestRepository _jobRequestRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public JobsController(IJobRequestRepository jobRequestRepository, IUnitOfWork unitOfWork)
     {
-        _sender = sender;
         _jobRequestRepository = jobRequestRepository;
+        _unitOfWork = unitOfWork;
     }
 
     // ===========================================
@@ -55,13 +55,13 @@ public class JobsController : ControllerBase
                 additionalMessage: request.AdditionalMessage,
                 categories: request.Categories,
                 paymentMethod: request.PaymentMethod,
-                totalCost: (decimal)request.TotalCost
+                totalCost: request.TotalCost
             );
 
             _jobRequestRepository.Add(jobRequest);
             await _unitOfWork.SaveChangesAsync();
             // ✨ RETORNA EL JOB COMPLETO CON ID
-            return CreatedAtAction(nameof(GetActiveJobByClient), new { clientId = clientId }, new JobDto
+            return CreatedAtAction(nameof(GetActiveJobByClient), new { clientId }, new JobDto
             {
                 Id = jobRequest.Id,
                 ClientId = jobRequest.ClientId,
@@ -210,14 +210,14 @@ public class JobsController : ControllerBase
                 additionalMessage: request.AdditionalMessage,
                 categories: request.Categories,
                 paymentMethod: request.PaymentMethod,
-                totalCost: (decimal)request.TotalCost
+                totalCost: request.TotalCost
             );
 
             _jobRequestRepository.Add(jobRequest);
             await _unitOfWork.SaveChangesAsync();
 
             // ✨ RETORNA EL JOB COMPLETO CON ID
-            return CreatedAtAction(nameof(GetActiveJobByClient), new { clientId = clientId }, new JobDto
+            return CreatedAtAction(nameof(GetActiveJobByClient), new { clientId }, new JobDto
             {
                 Id = jobRequest.Id,
                 ClientId = jobRequest.ClientId,
