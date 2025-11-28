@@ -72,4 +72,12 @@ public class JobRequest
         Status = newStatus;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    // --- 🚀 AÑADE ESTE NUEVO MÉTODO ---
+    public void UpdateCost(decimal newCost)
+    {
+        // Actualiza el costo total del trabajo
+        TotalCost = newCost;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

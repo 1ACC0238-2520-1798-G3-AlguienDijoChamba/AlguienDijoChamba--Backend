@@ -2,7 +2,6 @@
 
 using AlguienDijoChamba.Api.Jobs.Domain;
 using AlguienDijoChamba.Api.Jobs.Interfaces.Dtos;
-using AlguienDijoChamba.Api.Shared.Domain.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,18 +12,19 @@ namespace AlguienDijoChamba.Api.Jobs.Interfaces;
 [Route("api/v1/[controller]")]
 public class JobsController : ControllerBase
 {
-    // ✨ NUEVO: Inyección de dependencias para Active Jobs
+    // --- Inyectar MediatR (ISender) y el Repositorio (para los GETs) ---
+    private readonly ISender _sender;
     private readonly IJobRequestRepository _jobRequestRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public JobsController(IJobRequestRepository jobRequestRepository, IUnitOfWork unitOfWork)
     {
+        _sender = sender;
         _jobRequestRepository = jobRequestRepository;
-        _unitOfWork = unitOfWork;
     }
 
     // ===========================================
-    // 🔵 ENDPOINTS ORIGINALES DE TUS COLEGAS
+    // 🔵 ENDPOINT MODIFICADO (Usado por Cliente/Flutter)
     // ===========================================
 
     // Endpoint para que un cliente cree una solicitud
@@ -95,10 +95,8 @@ public class JobsController : ControllerBase
     {
         try
         {
-            // Aquí iría la lógica con MediatR para obtener las solicitudes
-            // 1. Crear un GetAvailableJobsQuery.
-            // 2. El handler consultaría la base de datos por solicitudes con estado "Pending".
-
+            // (Lógica futura de MediatR para GetAvailableJobsQuery)
+            await Task.CompletedTask;
             return Ok(new { message = "Endpoint de solicitudes disponibles listo para implementar." });
         }
         catch (Exception ex)
@@ -106,10 +104,6 @@ public class JobsController : ControllerBase
             return StatusCode(500, new { message = "Error fetching available jobs", error = ex.Message });
         }
     }
-
-    // ===========================================
-    // ✨ NUEVOS ENDPOINTS PARA ACTIVE JOBS
-    // ===========================================
 
     /// <summary>
     /// GET /api/v1/jobs/active
@@ -250,7 +244,7 @@ public class JobsController : ControllerBase
 
     /// <summary>
     /// GET /api/v1/jobs/active/customer/{clientId}
-    /// ✨ NUEVO: Obtener el Active Job actual del cliente
+    /// Obtener el Active Job actual del cliente
     /// </summary>
     [Authorize]
     [HttpGet("active/customer/{clientId}")]
@@ -259,11 +253,9 @@ public class JobsController : ControllerBase
         try
         {
             var jobRequest = await _jobRequestRepository.GetActiveJobByClientAsync(clientId);
-
             if (jobRequest == null)
                 return NotFound(new { message = "No active job found for this client" });
 
-            // ✨ FIX: Manejar ProfessionalId nullable
             var response = new JobDto
             {
                 Id = jobRequest.Id,
@@ -283,7 +275,6 @@ public class JobsController : ControllerBase
                 CreatedAt = jobRequest.CreatedAt,
                 UpdatedAt = jobRequest.UpdatedAt
             };
-
             return Ok(response);
         }
         catch (Exception ex)
@@ -294,7 +285,7 @@ public class JobsController : ControllerBase
 
     /// <summary>
     /// PATCH /api/v1/jobs/{jobId}/status
-    /// ✨ NUEVO: Actualizar el estado del job (Completed, Declined, etc)
+    /// Actualizar el estado del job (Completed, Declined, etc)
     /// </summary>
     [Authorize]
     [HttpPatch("{jobId}/status")]
@@ -352,7 +343,7 @@ public class JobsController : ControllerBase
 
     /// <summary>
     /// GET /api/v1/jobs/{jobId}
-    /// ✨ NUEVO: Obtener detalles de un job específico
+    /// Obtener detalles de un job específico
     /// </summary>
     [Authorize]
     [HttpGet("{jobId}")]
@@ -361,7 +352,6 @@ public class JobsController : ControllerBase
         try
         {
             var jobRequest = await _jobRequestRepository.GetByIdAsync(jobId);
-
             if (jobRequest == null)
                 return NotFound(new { message = "Job not found" });
 

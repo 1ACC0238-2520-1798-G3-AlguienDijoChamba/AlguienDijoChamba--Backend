@@ -15,12 +15,15 @@ public class CustomerJwtProvider(IOptions<JwtOptions> options) : ICustomerJwtPro
     
     public string Generate(User user, string role)
     {
-        // El Claim de rol se ha eliminado, dejando solo los Claims base (ID y Email).
-        var claims = new Claim[]
+        var claims = new List<Claim>
         {
+            // Estándar JWT
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email)
-            // Se quitó: new(ClaimTypes.Role, role)
+            new(JwtRegisteredClaimNames.Email, user.Email),
+        
+            // 🛑 ESTA ES LA LÍNEA MÁGICA QUE FALTA:
+            // SignalR usa esto para saber quién es el usuario cuando haces Clients.User(...)
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()) 
         };
 
         var signingCredentials = new SigningCredentials(

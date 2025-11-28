@@ -27,8 +27,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.FileProviders;
 using AlguienDijoChamba.Api.Reputation.Application;
-using AlguienDijoChamba.Api.Jobs.Domain;  // Para IJobRequestRepository
-using AlguienDijoChamba.Api.Jobs.Infrastructure.Repositories;  // Para JobRequestRepository
+using AlguienDijoChamba.Api.Jobs.Domain;  
+using AlguienDijoChamba.Api.Jobs.Infrastructure.Repositories;
+using AlguienDijoChamba.Api.Hubs; 
+using Microsoft.AspNetCore.SignalR; 
 
 
 
@@ -109,8 +111,28 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = config["Jwt:Issuer"],
             ValidAudience = config["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:SecretKey"]!))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:SecretKey"]!)),
+            NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                // Los clientes SignalR envían el token en el query string "access_token"
+                var accessToken = context.Request.Query["access_token"];
+
+                // Si hay token y la ruta es la del Hub...
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    (path.StartsWithSegments("/hubs/servicerequests")))
+                {
+                    // Leemos el token del Query String y lo asignamos al contexto
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
+        
     });
 
 builder.Services.AddCors(options =>
@@ -122,6 +144,8 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
+
+builder.Services.AddSignalR();
 
 
 var app = builder.Build();
@@ -163,4 +187,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.Run("http://0.0.0.0:5000");
+
+// Esta es la ruta que usarán los clientes Flutter y Android
+// Asegúrate de que apunte al namespace correcto de tu Hub
+app.MapHub<AlguienDijoChamba.Api.Hubs.ServiceRequestHub>("/hubs/servicerequests");
+app.Run(); 
