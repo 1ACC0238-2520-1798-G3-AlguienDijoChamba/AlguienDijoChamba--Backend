@@ -18,6 +18,7 @@ using AlguienDijoChamba.Api.Reputation.Domain;
 using AlguienDijoChamba.Api.Reputation.Infrastructure.Repositories;
 using AlguienDijoChamba.Api.Shared.ASP.Configuration.Extensions;
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
+using AlguienDijoChamba.Api.Shared.Infrastructure.Extensions;
 using AlguienDijoChamba.Api.Shared.Infrastructure.Persistence.EFC;
 using AlguienDijoChamba.Api.Shared.Infrastructure.Persistence.EFC.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -71,6 +72,7 @@ builder.Services.AddMediatR(cfg =>
     // 🔵 AGREGA TU PROPIO ASSEMBLY PARA TU HANDLER NUEVO:
     cfg.RegisterServicesFromAssembly(typeof(AlguienDijoChamba.Api.Reputation.Application.CreateReputationFromJobCommandHandler).Assembly);
 });
+builder.Services.AddInfrastructureServices();
 
 // 5. Añade Repositorios
 builder.Services.AddScoped<IUserRepository, UserRepository>();

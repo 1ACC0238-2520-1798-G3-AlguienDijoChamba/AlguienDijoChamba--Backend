@@ -18,4 +18,8 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task<Customer?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default) =>
         await _context.Customers.FirstOrDefaultAsync(c => c.UserId == userId, cancellationToken);
+    
+    public async Task<Customer?> GetByIdAsync(Guid customerId, CancellationToken cancellationToken = default) =>
+        // Aquí buscamos directamente por la clave primaria 'Id' de la entidad Customer
+        await _context.Customers.FirstOrDefaultAsync(c => c.Id == customerId, cancellationToken);
 }    
