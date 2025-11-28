@@ -1,16 +1,43 @@
 ﻿namespace AlguienDijoChamba.Api.Customers.Interfaces.Dtos;
 
-// DTO para devolver los datos del cliente
-// Se utiliza para transportar la respuesta de vuelta al API Controller
 public class CustomerProfileDto
 {
-    // Campos básicos (para mostrar en el perfil)
-    public string Nombres { get; set; } = string.Empty;
-    public string Apellidos { get; set; } = string.Empty;
-    public string Celular { get; set; } = string.Empty;
-    // Métodos de pago y preferencias (los campos nuevos)
-    public string PreferredPaymentMethod { get; set; } // Lo mostramos como string (ej: "Credit/Debit Card")
+    public Guid Id { get; set; }  // ✅ AGREGADO
+    public Guid UserId { get; set; }  // ✅ AGREGADO
+    public string Nombres { get; set; }
+    public string Apellidos { get; set; }
+    public string Celular { get; set; }
+    public string? PhotoUrl { get; set; }  // ✅ AGREGADO
+    public string PreferredPaymentMethod { get; set; }
     public bool AcceptsBookingUpdates { get; set; }
     public bool AcceptsPromotionsAndOffers { get; set; }
     public bool AcceptsNewsletter { get; set; }
+
+    // Constructor vacío para EF
+    public CustomerProfileDto() { }
+
+    // Constructor con parámetros (opcional)
+    public CustomerProfileDto(
+        Guid id,
+        Guid userId,
+        string nombres,
+        string apellidos,
+        string celular,
+        string? photoUrl,
+        string preferredPaymentMethod,
+        bool acceptsBookingUpdates,
+        bool acceptsPromotionsAndOffers,
+        bool acceptsNewsletter)
+    {
+        Id = id;
+        UserId = userId;
+        Nombres = nombres;
+        Apellidos = apellidos;
+        Celular = celular;
+        PhotoUrl = photoUrl;
+        PreferredPaymentMethod = preferredPaymentMethod;
+        AcceptsBookingUpdates = acceptsBookingUpdates;
+        AcceptsPromotionsAndOffers = acceptsPromotionsAndOffers;
+        AcceptsNewsletter = acceptsNewsletter;
+    }
 }

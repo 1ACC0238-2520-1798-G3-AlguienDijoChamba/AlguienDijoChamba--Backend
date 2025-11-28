@@ -9,29 +9,40 @@ using AlguienDijoChamba.Api.Customers.Interfaces.Dtos;
 
 namespace AlguienDijoChamba.Api.Customers.Application.Queries;
 
-// El Handler que MediatR busca
 public class CustomerProfileQueryHandler(ICustomerRepository repository) 
     : IRequestHandler<GetCustomerProfileQuery, CustomerProfileDto>
 {
     public async Task<CustomerProfileDto> Handle(GetCustomerProfileQuery query, CancellationToken cancellationToken)
     {
-        // 🚀 CORRECCIÓN CLAVE: Usamos GetByUserIdAsync para buscar por el ID de usuario (Customer.UserId)
-        // **NOTA:** Asumimos que ICustomerRepository ahora tiene este método.
-        var customer = await repository.GetByUserIdAsync(query.UserId, cancellationToken); 
-
+        Console.WriteLine($"🔍 GET PROFILE QUERY: Buscando por UserId: {query.UserId}");
+        
+        // ✅ PRIMERO: Intentar por UserId (ID real del usuario, f7e2...)
+        var customer = await repository.GetByUserIdAsync(query.UserId, cancellationToken);
+        
+        Console.WriteLine($"🔍 GetByUserIdAsync resultado: {(customer != null ? "Encontrado" : "No encontrado")}");
+        
+        // ✅ SI NO ENCUENTRA: Intentar por Id (customerId, 3fb3...)
         if (customer == null)
         {
-            // Lanza excepción si no se encuentra (para que el Controller devuelva 404)
-            throw new Exception($"Perfil de cliente con UserID {query.UserId} no encontrado."); 
+            Console.WriteLine($"⚠️ No encontrado por UserId, intentando por Id (customerId): {query.UserId}");
+            customer = await repository.GetByIdAsync(query.UserId, cancellationToken);
+            Console.WriteLine($"🔍 GetByIdAsync resultado: {(customer != null ? "Encontrado" : "No encontrado")}");
+        }
+        
+        if (customer == null)
+        {
+            throw new Exception($"Perfil de cliente no encontrado para ID: {query.UserId}"); 
         }
 
         // Mapear la entidad de dominio al DTO de respuesta
         return new CustomerProfileDto
         {
+            Id = customer.Id,
+            UserId = customer.UserId,
             Nombres = customer.Nombres,
             Apellidos = customer.Apellidos,
             Celular = customer.Celular,
-            // Mapeo (ej: enum a string)
+            PhotoUrl = customer.PhotoUrl,
             PreferredPaymentMethod = customer.PreferredPaymentMethod.ToString(), 
             AcceptsBookingUpdates = customer.AcceptsBookingUpdates,
             AcceptsPromotionsAndOffers = customer.AcceptsPromotionsAndOffers,
