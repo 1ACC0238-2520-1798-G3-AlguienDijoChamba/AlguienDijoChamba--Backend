@@ -18,6 +18,7 @@ using AlguienDijoChamba.Api.Reputation.Domain;
 using AlguienDijoChamba.Api.Reputation.Infrastructure.Repositories;
 using AlguienDijoChamba.Api.Shared.ASP.Configuration.Extensions;
 using AlguienDijoChamba.Api.Shared.Domain.Repositories;
+using AlguienDijoChamba.Api.Shared.Infrastructure.Extensions;
 using AlguienDijoChamba.Api.Shared.Infrastructure.Persistence.EFC;
 using AlguienDijoChamba.Api.Shared.Infrastructure.Persistence.EFC.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -30,6 +31,7 @@ using AlguienDijoChamba.Api.Jobs.Domain;
 using AlguienDijoChamba.Api.Jobs.Infrastructure.Repositories;
 using AlguienDijoChamba.Api.Hubs; 
 using Microsoft.AspNetCore.SignalR; 
+
 
 
 
@@ -72,6 +74,7 @@ builder.Services.AddMediatR(cfg =>
     // 🔵 AGREGA TU PROPIO ASSEMBLY PARA TU HANDLER NUEVO:
     cfg.RegisterServicesFromAssembly(typeof(AlguienDijoChamba.Api.Reputation.Application.CreateReputationFromJobCommandHandler).Assembly);
 });
+builder.Services.AddInfrastructureServices();
 
 // 5. Añade Repositorios
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -80,6 +83,7 @@ builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IReputationRepository, ReputationRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IJobRequestRepository, JobRequestRepository>();
+
 
 // 6. Añade Servicios Externos (Reniec)
 builder.Services.AddHttpClient("ReniecApiClient", client =>

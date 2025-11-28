@@ -270,6 +270,7 @@ public class ReputationController(ISender sender) : ControllerBase
     /// <summary>
 /// Crea o actualiza la reputación de un profesional basada en una review de job.
 /// </summary>
+[AllowAnonymous] 
 [HttpPost("job/review")] 
 [ProducesResponseType(typeof(ReputationDto), 201)]
 [ProducesResponseType(400)]

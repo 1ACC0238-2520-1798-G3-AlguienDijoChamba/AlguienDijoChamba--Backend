@@ -23,71 +23,63 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // 1. Llama al método base PRIMERO. Esto aplica convenciones predeterminadas.
+        // 1. Llama al método base PRIMERO.
         base.OnModelCreating(modelBuilder);
-        
-        // 2. Aplica configuraciones externas (IEntityTypeConfiguration).
+
+        // 2. Aplica configuraciones externas
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-        // 3. Aplica las configuraciones manuales para sobrescribir convenciones o configuraciones externas.
-        
+        // 3. Configuraciones manuales
+
         modelBuilder.Entity<ProfessionalTag>(entity =>
         {
-            // 1. Clave Compuesta (Resuelve el error de la clave primaria)
-            entity.HasKey(pt => new { pt.ProfessionalId, pt.TagId }); 
-        
-            // 2. 🚀 CORRECCIÓN CLAVE: Definición explícita de la relación Tag
-            // Esto le dice a EF Core: "Usa la propiedad de navegación 'Tag' y vincúlala a la columna 'TagId'."
-            entity.HasOne(pt => pt.Tag) // Navega de ProfessionalTag A Tag
-                .WithMany(t => t.ProfessionalTags) // Un Tag tiene muchos ProfessionalTags
-                .HasForeignKey(pt => pt.TagId) // Usa la columna TagId como FK
-                .OnDelete(DeleteBehavior.Cascade); // Opcional: Elimina las uniones si se elimina el Tag
+            entity.HasKey(pt => new { pt.ProfessionalId, pt.TagId });
 
-            // 3. Definición explícita de la relación Professional
-            // Aunque Professional está en otro dominio, lo configuramos para claridad.
+            entity.HasOne(pt => pt.Tag)
+                .WithMany(t => t.ProfessionalTags)
+                .HasForeignKey(pt => pt.TagId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity.HasOne<Professional>()
                 .WithMany(p => p.ProfessionalTags)
                 .HasForeignKey(pt => pt.ProfessionalId)
-                .OnDelete(DeleteBehavior.Cascade); // Opcional
+                .OnDelete(DeleteBehavior.Cascade);
         });
-        
-        // 🔒 Unicidad del nombre del Tag
+
         modelBuilder.Entity<Tag>(entity =>
         {
             entity.HasIndex(t => t.Name).IsUnique();
         });
-        
-        // ✨ NUEVA CONFIGURACIÓN para JobRequest (Active Jobs)
+
+        // ✨ RELACIÓN JobRequest → Professional
         modelBuilder.Entity<JobRequest>(entity =>
         {
             entity.HasKey(e => e.Id);
-            
-            // Campos obligatorios
+
             entity.Property(e => e.ClientId).IsRequired();
             entity.Property(e => e.Specialty).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.Status).IsRequired().HasConversion<string>();
-            
-            // ✨ NUEVOS campos para Active Jobs
+
             entity.Property(e => e.Address).HasMaxLength(200);
             entity.Property(e => e.ScheduledHour).HasMaxLength(50);
             entity.Property(e => e.AdditionalMessage).HasMaxLength(500);
             entity.Property(e => e.PaymentMethod).HasMaxLength(50);
             entity.Property(e => e.TotalCost).HasPrecision(10, 2);
-            
-            // ✨ Almacenar Categories como JSON (EF Core 7+)
+
             entity.Property(e => e.Categories)
                 .HasConversion(
                     v => string.Join(',', v),
                     v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
                 );
-            
-            // ✨ Índice para búsquedas rápidas de active jobs
+
             entity.HasIndex(e => new { e.ClientId, e.Status });
-            
-            // Relaciones (si existen navigation properties en el futuro)
-            // entity.HasOne<Customer>()...
-            // entity.HasOne<Professional>()...
+
+            // 👇 FK hacia Professional (usa Professional.JobRequests como colección inversa)
+            entity.HasOne(j => j.Professional)
+                .WithMany(p => p.JobRequests)
+                .HasForeignKey(j => j.ProfessionalId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
     

@@ -7,10 +7,14 @@ using MediatR;
 
 namespace AlguienDijoChamba.Api.Reputation.Application;
 
-public class CreateReputationFromJobCommandHandler : IRequestHandler<CreateReputationFromJobCommand, object>
+// Handler que crea/actualiza la reputación a partir de un Job
+public class CreateReputationFromJobCommandHandler
+    : IRequestHandler<CreateReputationFromJobCommand, object>
 {
+    // ✅ Usar la interfaz para que funcione con DI
     private readonly IReputationRepository _reputationRepository;
-    public CreateReputationFromJobCommandHandler(IReputationRepository reputationRepository) 
+
+    public CreateReputationFromJobCommandHandler(IReputationRepository reputationRepository)
     {
         _reputationRepository = reputationRepository;
     }
@@ -19,6 +23,7 @@ public class CreateReputationFromJobCommandHandler : IRequestHandler<CreateReput
     {
         Console.WriteLine($"🔵 Handler: Procesando CreateReputationFromJobCommand - JobId: {request.JobId}");
         
+        // ⚠️ Implementación provisional: devuelve un DTO “dummy”
         return new ReputationDto
         {
             Id = Guid.NewGuid(),

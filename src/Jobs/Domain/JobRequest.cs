@@ -1,19 +1,23 @@
-﻿﻿namespace AlguienDijoChamba.Api.Jobs.Domain;
+﻿﻿using AlguienDijoChamba.Api.Professionals.Domain;
 
+namespace AlguienDijoChamba.Api.Jobs.Domain;
 
 // ✅ CORREGIDO: Agregué Cancelled
 public enum JobRequestStatus { Pending, Accepted, Declined, Completed, Cancelled }
-
 
 public class JobRequest
 {
     public Guid Id { get; private set; }
     public Guid ClientId { get; private set; } // ID del usuario que solicita
     public Guid? ProfessionalId { get; private set; } // ID del profesional (opcional al inicio)
+
+    // 👇 navegación al profesional
+    public Professional? Professional { get; private set; }
+
     public string Specialty { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
     public JobRequestStatus Status { get; private set; }
-    
+
     // ✨ NUEVOS CAMPOS AGREGADOS para Active Jobs
     public string Address { get; private set; } = string.Empty;
     public DateTime ScheduledDate { get; private set; }
@@ -24,10 +28,10 @@ public class JobRequest
     public decimal TotalCost { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    
+
     // Constructor requerido por EF Core
     private JobRequest() { }
-    
+
     // ✨ NUEVO CONSTRUCTOR para crear Active Jobs
     public static JobRequest CreateActiveJob(
         Guid clientId,
@@ -61,7 +65,8 @@ public class JobRequest
             UpdatedAt = DateTime.UtcNow
         };
     }
-    
+
+    // ✨ NUEVO MÉTODO para actualizar estado
     public void UpdateStatus(JobRequestStatus newStatus)
     {
         Status = newStatus;

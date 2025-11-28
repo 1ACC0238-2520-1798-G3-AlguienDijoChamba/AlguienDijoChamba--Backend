@@ -28,6 +28,15 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<bool>("AcceptsBookingUpdates")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("AcceptsNewsletter")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("AcceptsPromotionsAndOffers")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("Apellidos")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -39,6 +48,13 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
                     b.Property<string>("Nombres")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<string>("PhotoUrl")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("PreferredPaymentMethod")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("char(36)");
@@ -134,6 +150,8 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProfessionalId");
 
                     b.HasIndex("ClientId", "Status");
 
@@ -314,6 +332,16 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
                     b.ToTable("Reputations");
                 });
 
+            modelBuilder.Entity("AlguienDijoChamba.Api.Jobs.Domain.JobRequest", b =>
+                {
+                    b.HasOne("AlguienDijoChamba.Api.Professionals.Domain.Professional", "Professional")
+                        .WithMany("JobRequests")
+                        .HasForeignKey("ProfessionalId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Professional");
+                });
+
             modelBuilder.Entity("AlguienDijoChamba.Api.Professionals.Domain.Professional", b =>
                 {
                     b.HasOne("AlguienDijoChamba.Api.IAM.Domain.User", null)
@@ -342,6 +370,8 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
 
             modelBuilder.Entity("AlguienDijoChamba.Api.Professionals.Domain.Professional", b =>
                 {
+                    b.Navigation("JobRequests");
+
                     b.Navigation("ProfessionalTags");
                 });
 

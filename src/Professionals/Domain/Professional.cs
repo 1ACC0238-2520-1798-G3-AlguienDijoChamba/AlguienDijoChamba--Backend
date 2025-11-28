@@ -1,4 +1,5 @@
 ﻿using AlguienDijoChamba.Api.Reputation.Domain;
+using AlguienDijoChamba.Api.Jobs.Domain;
 
 namespace AlguienDijoChamba.Api.Professionals.Domain;
 
@@ -27,11 +28,18 @@ public class Professional
     public string? CertificationUrls { get; private set; }
     
     public ICollection<ProfessionalTag> ProfessionalTags { get; private set; } = new List<ProfessionalTag>();
-    
+
+    // 👇 NUEVO: colección de JobRequests relacionados
+    public ICollection<JobRequest> JobRequests { get; private set; } = new List<JobRequest>();
+
+    // 👇 OPCIONAL: nombre completo calculado (para usar en DTOs)
+    public string FullName => $"{Nombres} {Apellidos}".Trim();
+
     // Constructor requerido por EF Core (privado y vacío)
     private Professional() { }
 
-    private Professional(Guid userId, string dni, string nombres, string apellidos, string celular, string email){
+    private Professional(Guid userId, string dni, string nombres, string apellidos, string celular, string email)
+    {
         Id = Guid.NewGuid();
         UserId = userId;
         Dni = dni;
