@@ -74,7 +74,6 @@ Una vez configurado el proyecto, puedes ejecutarlo de dos maneras:
   ```
 
 La API se iniciará y estará disponible en `http://localhost:5101` (el puerto puede variar). La documentación de Swagger se abrirá automáticamente en tu navegador.
-
 -----
 
 ## \#\# Migraciones de la Base de Datos 🗄️

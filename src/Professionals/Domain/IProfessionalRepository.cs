@@ -8,6 +8,10 @@ public interface IProfessionalRepository
     void Add(Professional professional);
     Task<Professional?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
     
+    Task<Professional?> GetByIdAsync(Guid professionalId, CancellationToken cancellationToken); 
+    
     // --- MÉTODO REQUERIDO PARA ELIMINACIÓN ---
     void Remove(Professional professional);
+    
+    Task<IEnumerable<Guid>> FindProfessionalIdsByTermAsync(string term, CancellationToken cancellationToken = default);
 }

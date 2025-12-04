@@ -22,6 +22,48 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("AlguienDijoChamba.Api.Customers.Domain.Customer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<bool>("AcceptsBookingUpdates")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("AcceptsNewsletter")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("AcceptsPromotionsAndOffers")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Apellidos")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Celular")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Nombres")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PhotoUrl")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("PreferredPaymentMethod")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Customers");
+                });
+
             modelBuilder.Entity("AlguienDijoChamba.Api.IAM.Domain.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -51,26 +93,109 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("AdditionalMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("Categories")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<Guid>("ClientId")
                         .HasColumnType("char(36)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<Guid?>("ProfessionalId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("ScheduledDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ScheduledHour")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Specialty")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<decimal>("TotalCost")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionalId");
+
+                    b.HasIndex("ClientId", "Status");
+
+                    b.ToTable("JobRequests");
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Notifications.Domain.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<Guid?>("ProfessionalId")
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("Specialty")
+                    b.Property<int?>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("Status")
+                    b.Property<int>("Type")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("JobRequests");
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("AlguienDijoChamba.Api.Professionals.Domain.Professional", b =>
@@ -147,6 +272,76 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
                     b.ToTable("Professionals", (string)null);
                 });
 
+            modelBuilder.Entity("AlguienDijoChamba.Api.Reputation.Domain.ProfessionalTag", b =>
+                {
+                    b.Property<Guid>("ProfessionalId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("ProfessionalId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("ProfessionalTags");
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Reputation.Domain.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Reputation.Domain.UserReputationTechnician", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("CompletedJobs")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("HourlyRate")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<Guid>("ProfessionalId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ProfessionalLevel")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<double>("StarRating")
+                        .HasColumnType("double");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Reputations");
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Jobs.Domain.JobRequest", b =>
+                {
+                    b.HasOne("AlguienDijoChamba.Api.Professionals.Domain.Professional", "Professional")
+                        .WithMany("JobRequests")
+                        .HasForeignKey("ProfessionalId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Professional");
+                });
+
             modelBuilder.Entity("AlguienDijoChamba.Api.Professionals.Domain.Professional", b =>
                 {
                     b.HasOne("AlguienDijoChamba.Api.IAM.Domain.User", null)
@@ -154,6 +349,35 @@ namespace AlguienDijoChamba.Api.src.Shared.Infrastructure.Persistence.EFC.Migrat
                         .HasForeignKey("AlguienDijoChamba.Api.Professionals.Domain.Professional", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Reputation.Domain.ProfessionalTag", b =>
+                {
+                    b.HasOne("AlguienDijoChamba.Api.Professionals.Domain.Professional", null)
+                        .WithMany("ProfessionalTags")
+                        .HasForeignKey("ProfessionalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AlguienDijoChamba.Api.Reputation.Domain.Tag", "Tag")
+                        .WithMany("ProfessionalTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Professionals.Domain.Professional", b =>
+                {
+                    b.Navigation("JobRequests");
+
+                    b.Navigation("ProfessionalTags");
+                });
+
+            modelBuilder.Entity("AlguienDijoChamba.Api.Reputation.Domain.Tag", b =>
+                {
+                    b.Navigation("ProfessionalTags");
                 });
 #pragma warning restore 612, 618
         }

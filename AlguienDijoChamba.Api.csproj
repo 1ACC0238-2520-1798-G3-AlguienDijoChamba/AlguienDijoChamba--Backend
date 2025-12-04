@@ -8,7 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="DotNetEnv" Version="3.1.1" />
-        <PackageReference Include="MediatR" Version="13.0.0" />
+        <PackageReference Include="MediatR" Version="13.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
         <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
@@ -29,6 +29,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="src\Customers\Application\Commands\" />
       <Folder Include="src\Jobs\Application\" />
       <Folder Include="src\Jobs\Infrastructure\" />
       <Folder Include="src\Shared\Infrastructure\Persistence\Repositories\" />
