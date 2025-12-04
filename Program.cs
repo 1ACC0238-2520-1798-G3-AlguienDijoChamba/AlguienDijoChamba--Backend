@@ -139,9 +139,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.SetIsOriginAllowed(origin => true) // 🚀 Permite cualquier origen (localhost:*, 127.0.0.1:*)
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials(); // 🚀 Necesario para SignalR y Auth en Web
     });
 });
 

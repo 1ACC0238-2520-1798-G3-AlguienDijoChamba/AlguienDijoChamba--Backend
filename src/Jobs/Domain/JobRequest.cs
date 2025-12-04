@@ -60,7 +60,7 @@ public class JobRequest
             Categories = categories,
             PaymentMethod = paymentMethod,
             TotalCost = totalCost,
-            Status = JobRequestStatus.Accepted, // Active job = Accepted
+            Status = JobRequestStatus.Pending,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
