@@ -5,6 +5,7 @@ using MediatR;
 
 namespace AlguienDijoChamba.Api.Reputation.Application.Commands;
 
+
 public record CreateInitialReputationCommand(
     Guid ProfessionalId, 
     decimal InitialHourlyRate
