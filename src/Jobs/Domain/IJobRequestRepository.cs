@@ -13,4 +13,6 @@ public interface IJobRequestRepository
 
     // ✨ EXISTENTE: actualizar un job
     Task UpdateAsync(JobRequest jobRequest);
+    
+    Task<IEnumerable<JobRequest>> GetAcceptedJobsByProfessionalAsync(Guid professionalId);
 }

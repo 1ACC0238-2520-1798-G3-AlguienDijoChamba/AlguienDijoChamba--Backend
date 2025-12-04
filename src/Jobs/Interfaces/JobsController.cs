@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using AlguienDijoChamba.Api.Jobs.Application.Queries;
 
 namespace AlguienDijoChamba.Api.Jobs.Interfaces;
 
@@ -74,6 +75,19 @@ public class JobsController : ControllerBase
     {
         // Reutilizamos la lógica del comando, ya que es lo mismo: crear un trabajo y notificar.
         return await CreateJobRequest(request);
+    }
+    
+    [Authorize]
+    [HttpGet("scheduled")] // GET /api/v1/jobs/scheduled
+    public async Task<IActionResult> GetScheduledJobs(CancellationToken cancellationToken)
+    {
+        // Obtener ID del usuario desde el Token
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    
+        var query = new GetScheduledJobsQuery(userId);
+        var jobs = await _sender.Send(query, cancellationToken);
+    
+        return Ok(jobs);
     }
 
     // ===========================================

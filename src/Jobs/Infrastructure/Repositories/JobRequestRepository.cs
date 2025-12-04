@@ -41,6 +41,13 @@ public class JobRequestRepository : IJobRequestRepository
             .OrderByDescending(j => j.CreatedAt)
             .ToListAsync();
     }
+    public async Task<IEnumerable<JobRequest>> GetAcceptedJobsByProfessionalAsync(Guid professionalId)
+    {
+        return await _context.JobRequests
+            .Where(j => j.ProfessionalId == professionalId && j.Status == JobRequestStatus.Accepted)
+            .OrderBy(j => j.ScheduledDate) // Ordenar por fecha para el calendario
+            .ToListAsync();
+    }
 
     public async Task UpdateAsync(JobRequest jobRequest)
     {
